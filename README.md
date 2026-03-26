@@ -1,120 +1,63 @@
-# Slides Plugin (v2.0.0)
+# 🎯 Slides
 
-> **Presentation armory for astraeus agents.** Generate styled slide decks, posters, and presentations from Markdown, papers, or natural language descriptions — via 7 rendering engines and 30 curated visual styles.
+<p align="center">
+  <img src="https://img.shields.io/badge/version-2.0.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/engines-7-green?style=for-the-badge" alt="7 Engines">
+  <img src="https://img.shields.io/badge/styles-30-purple?style=for-the-badge" alt="30 Styles">
+  <img src="https://img.shields.io/badge/skills-3-orange?style=for-the-badge" alt="3 Skills">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/rooftop-Owl/slides?style=for-the-badge&color=green" alt="License"></a>
+</p>
 
----
-
-## Overview
-
-The `slides` module extends astraeus with a full presentation generation pipeline. It provides:
-
-- **7 rendering engines** — from quick Marp previews to polished editable PPTX to academic Beamer PDFs
-- **30 curated visual styles** across 6 categories (corporate, academic, creative, technical, elegant, specialty)
-- **3 skills** covering generation, design intelligence, and visual QA
-- **2 specialized agents** — `slide-designer` and `slide-qa`
-- **1 command** — `/slides` with engine routing, style selection, and optional preview/refine flags
-- **Production tools** — `slide_factory.py`, `validate_pptx.py`, `thumbnail_grid.py`, plus bundled `html2pptx/`, `pptx_editor/`, and `md2pptx/`
-
-The default output is a styled, editable 16:9 PPTX via `python-pptx + SlideFactory`. All dependencies are optional — engines degrade gracefully with install guidance when unavailable.
-
-This module **supersedes** the `presentation` skill from `research-core`. The original skill remains in research-core as a lightweight fallback for projects that don't load `slides`.
+<p align="center">
+  A 7-engine presentation plugin for Claude Code — generates PPTX, HTML, reveal.js, Beamer, and Marp decks with 30 curated styles, anti-AI-slop heuristics, and opt-in design refinement.
+</p>
 
 ---
 
-## Quick Start
+## Installation
 
 ```bash
-# Load the module into your project
-astraeus load slides
-
-# Generate a presentation
-/slides "Create a 10-slide talk on climate risk assessment results"
-
-# Specify engine and format
-/slides "topic" --engine marp --format pdf
-
-# Use a named style
-/slides "topic" --style executive-suite
-
-# Preview style options before committing
-/slides "topic" --preview
-
-# Auto-refine after generation (max 2 iterations via slide-qa)
-/slides "topic" --refine
+/plugin marketplace add rooftop-Owl/slides
+/plugin install slides@slides-marketplace
 ```
 
-After loading, the `slide-generation` skill and `/slides` command are available in your project. The `md2pptx` bundled script is also accessible at `.claude/tools/md2pptx/md2pptx.py`.
+After installing, the `/slides` command, 3 skills, and 2 agents are immediately available in your Claude Code session. No configuration required — engines degrade gracefully if optional dependencies are missing.
+
 
 ---
 
-## Engines
+## Why Slides?
 
-Seven engines cover every presentation use case. The default (`python-pptx + SlideFactory`) produces styled, editable PPTX with proper 16:9 layout, header/footer, bullet styling, and image fitting.
+Most presentation tools generate generic AI output. Slides enforces quality through architecture:
 
-| Engine | Best For | Output | Dependency |
-|--------|----------|--------|------------|
-| **python-pptx** | Default — styled editable deck | Editable PPTX | `pip install python-pptx` |
-| **md2pptx** | Template-first Markdown import | Editable PPTX | `python-pptx` (bundled script) |
-| **Marp** | Quick preview, PDF handouts | HTML / PDF / PPTX (images) | `npm install -g @marp-team/marp-cli` |
-| **reveal.js** | Web presentations, animations | Interactive HTML | `pandoc` or `npx` |
-| **Beamer** | Conference talks, equations | Academic PDF | `pdflatex` (TeX Live / MiKTeX) |
-| **Standalone HTML** | Full design control, version-controllable | HTML files | None |
-| **RISE/Jupyter** | Live code demonstrations | Live notebook | `pip install rise` |
+- **7 engines** — choose the right tool for every context (quick preview vs. polished boardroom deck vs. academic PDF)
+- **30 curated styles** — every preset was designed to avoid the "AI generated" look
+- **Progressive disclosure** — the core skill is 318 lines; 9 reference files load on demand, keeping context lean
+- **Separation of concerns** — generation and QA are handled by different agents
 
-**Engine auto-resolution** (when `--engine` is omitted):
 
-```
---format pptx                → python-pptx + SlideFactory (styled editable default)
---format pptx --template X   → md2pptx (template-first markdown import)
---format pptx --static       → Marp (image-based)
---format html                → Marp (clean, fast)
---format html --interactive  → reveal.js (animations, fragments)
---format pdf                 → Marp (modern)
---format pdf --academic      → Beamer (traditional)
---format notebook            → RISE
-No format specified          → python-pptx + SlideFactory
-```
+## What's Inside
 
-**Graceful degradation**: if an engine is unavailable, the module reports the missing dependency with its install command and offers the nearest fallback. It never silently fails.
+### Skills
 
----
+| Skill | Description |
+|-------|-------------|
+| **slide-generation** | Progressive disclosure core (318 lines) + 9 phase-loaded reference files. 7 engines, audience intelligence, narrative structure. |
+| **presentation-design-styles** | 30 curated styles across 6 categories. Mood→preset mapping. Anti-AI-slop font/color bans. |
+| **presentation-visual-qa** | Two rendering paths (wkhtmltoimage + Playwright). Inspection checklist. PASS/FAIL verdicts. |
 
-## Styles
+### Agents
 
-30 curated visual styles across 6 categories. Specify with `--style <name>` or describe your desired look and the command selects the best match.
+| Agent | Role |
+|-------|------|
+| **slide-designer** | Aesthetic direction — style selection, audience awareness, anti-slop enforcement |
+| **slide-qa** | Visual quality assurance — render, inspect, verdict |
 
-| Category | Count | Aesthetic | Example Styles |
-|----------|-------|-----------|----------------|
-| **Corporate** | 5 | Professional, brand-safe, boardroom-ready | `corporate-blue`, `corporate-minimal`, `corporate-bold` |
-| **Academic** | 5 | Clean, readable, conference-appropriate | `academic-clean`, `academic-metropolis`, `academic-poster` |
-| **Creative** | 5 | Bold, expressive, high visual impact | `creative-gradient`, `creative-dark-pop`, `creative-editorial` |
-| **Technical** | 5 | Code-friendly, dark themes, developer-focused | `tech-dark`, `tech-terminal`, `tech-blueprint` |
-| **Elegant** | 5 | Minimal, refined, premium feel | `elegant-mono`, `elegant-serif`, `elegant-glass` |
-| **Specialty** | 5 | Purpose-built for specific contexts | `pitch-deck`, `data-story`, `workshop` |
+### Commands
 
-Full style descriptions, color palettes, and typography specs: [handbook/style-catalog.md](handbook/style-catalog.md)
-
-Use `--preview` to generate 2–3 style previews before committing to a full deck.
-
----
-
-## Commands
-
-### `/slides`
-
-7-engine presentation router. Delegates to **Hephaestus** with the `slide-generation` skill.
-
-```
-/slides "topic"                          # Default: python-pptx editable PPTX
-/slides "topic" --engine md2pptx         # Template-first Markdown import
-/slides "topic" --engine marp --format pdf
-/slides "topic" --engine reveal --interactive
-/slides "topic" --engine beamer --academic
-/slides "topic" --from paper-draft.md --format pptx
-/slides "topic" --style corporate-blue
-/slides "topic" --preview                # Show style options first
-/slides "topic" --refine                 # Auto-QA and fix after generation
-```
+| Command | Description |
+|---------|-------------|
+| `/slides` | Main entry point. Flags: `--preview`, `--refine`, `--style <name>` |
 
 **Key flags:**
 
@@ -132,155 +75,182 @@ Use `--preview` to generate 2–3 style previews before committing to a full dec
 | `--interactive` | false | Prefer interactive output (reveal.js) |
 | `--output` | `./slides/` | Output directory |
 
----
+### Tools
 
-## Agents
-
-Two specialized agents handle generation and quality assurance:
-
-### `slide-designer`
-
-Generates presentation content and structure. Handles engine selection, outline creation, source content generation (Markdown, Python, LaTeX, HTML), and engine invocation. Reports output path, engine used, editability status, and validation results.
-
-### `slide-qa`
-
-Visual quality assurance agent. Inspects rendered slides for layout issues, font consistency, contrast ratios, and structural problems. Used automatically when `--refine` is passed to `/slides` (max 2 iterations). Can also be invoked directly for manual QA on existing decks.
+| Tool | Purpose |
+|------|---------|
+| `slide_factory.py` | python-pptx factory with 30 Theme presets |
+| `validate_pptx.py` | Structural + style compliance + placeholder detection |
+| `thumbnail_grid.py` | QA overview grid from slide screenshots |
+| `html2pptx/` | HTML→PPTX conversion pipeline |
+| `pptx_editor/` | XML-level PPTX manipulation (unpack/edit/pack) |
+| `md2pptx/` | Markdown→PPTX via bundled md2pptx |
 
 ---
 
 ## Plugin Structure
 
 ```
-modules/slides/
-├── README.md                          # This file — full documentation
-├── AGENTS.md                          # → redirects to README.md
-├── MODULE_CONTEXT.md                  # → redirects to README.md
-├── module.json                        # Module manifest (astraeus discoverability)
-│
+slides/
+├── README.md
 ├── agents/
-│   ├── slide-designer.md              # Presentation generation agent
-│   └── slide-qa.md                    # Visual QA agent
-│
+│   ├── slide-designer.md       # Presentation generation agent
+│   └── slide-qa.md             # Visual QA agent
 ├── commands/
-│   └── slides.md                      # /slides command definition
-│
+│   └── slides.md               # /slides command definition
 ├── skills/
-│   ├── slide-generation/              # 7-engine generation workflows
-│   ├── presentation-design-styles/    # 30 styles, 5 presets, anti-patterns
-│   └── presentation-visual-qa/        # Visual rendering checks, Playwright
-│
+│   ├── slide-generation/       # 7-engine generation workflows
+│   ├── presentation-design-styles/  # 30 styles, 5 presets, anti-patterns
+│   └── presentation-visual-qa/ # Visual rendering checks, Playwright
 ├── tools/
-│   ├── slide_factory.py               # python-pptx helper (16:9, styling)
-│   ├── validate_pptx.py               # Structural PPTX inspection CLI
-│   ├── thumbnail_grid.py              # Slide thumbnail grid generator
-│   ├── html2pptx/                     # HTML → PPTX conversion pipeline
-│   ├── pptx_editor/                   # PPTX editing utilities
-│   └── md2pptx/                       # Bundled md2pptx script (NOT on PyPI)
-│
+│   ├── slide_factory.py        # python-pptx helper (16:9, styling)
+│   ├── validate_pptx.py        # Structural PPTX inspection CLI
+│   ├── thumbnail_grid.py       # Slide thumbnail grid generator
+│   ├── html2pptx/              # HTML → PPTX conversion pipeline
+│   ├── pptx_editor/            # PPTX editing utilities
+│   └── md2pptx/                # Bundled md2pptx (NOT on PyPI)
 ├── templates/
-│   ├── marp/
-│   │   ├── default.css                # Clean modern 16:9 Marp theme
-│   │   ├── academic.css               # Conference/academic theme
-│   │   └── .marprc.yml                # Reference Marp CLI configuration
-│   ├── beamer/
-│   │   └── metropolis-template.tex    # Modern academic LaTeX starter
-│   └── html/
-│       ├── slide-template.html        # Standalone HTML (4 layout variants)
-│       └── deck-template.html         # Multi-slide review wrapper
-│
+│   ├── marp/                   # default.css, academic.css, .marprc.yml
+│   ├── beamer/                 # metropolis-template.tex
+│   └── html/                   # slide-template.html, deck-template.html
 ├── handbook/
-│   ├── getting-started.md             # Step-by-step usage guide
-│   ├── engine-guide.md                # Deep-dive per-engine reference
-│   └── style-catalog.md              # All 30 styles with descriptions
-│
-├── hooks/                             # Plugin lifecycle hooks
-├── tests/                             # Test suite
-└── .claude-plugin/                    # Plugin metadata
+│   ├── getting-started.md
+│   ├── engine-guide.md
+│   └── style-catalog.md        # All 30 styles with descriptions
+├── hooks/                      # Plugin lifecycle hooks
+├── tests/                      # Test suite
+└── .claude-plugin/
+    ├── plugin.json
+    └── marketplace.json
+```
+---
+
+## Usage Examples
+
+```
+/slides "Quarterly board report on AI adoption metrics"
+/slides "PhD defense: climate risk modeling with CLIMADA" --style academic
+/slides "Product launch deck for Series B investors" --preview
+/slides "Workshop: Introduction to RAG architectures" --refine
+/slides "Team retrospective Q1 2026" --style minimalist
 ```
 
 ---
 
-## Skills
+## Architecture
 
-Three skills with progressive disclosure — load only what you need:
-
-| Skill | Triggers | Content |
-|-------|----------|---------|
-| `slide-generation` | `marp`, `slide deck`, `generate slides`, `editable pptx`, `beamer talk`, `reveal slides`, `poster` | 7-engine armory with invocation patterns, engine resolution logic, validation steps, and graceful degradation |
-| `presentation-design-styles` | `design style`, `color palette`, `font selection`, `visual style` | 30 curated styles, 5 aesthetic presets, CSS themes, anti-pattern checklist |
-| `presentation-visual-qa` | `visual QA`, `screenshot check`, `render verify` | Visual rendering verification, wkhtmltoimage + Playwright workflow, checklist |
-
-**Progressive disclosure**: `slide-generation` is the primary skill and covers all engine workflows. Load `presentation-design-styles` when style selection or design critique is needed. Load `presentation-visual-qa` for automated visual inspection.
-
-Always load `slide-generation` when working on presentations:
-
-```python
-load_skills=["slide-generation"]
+```
+/slides "topic"
+    │
+    ├─► Engine Selection (core SKILL.md — 318 lines)
+    │       Marp │ md2pptx │ python-pptx │ reveal.js │ Beamer │ HTML │ RISE
+    │
+    ├─► Phase Loading (on-demand reference files)
+    │       references/engine-{name}.md loaded per selected engine
+    │
+    ├─► Style Application (30 presets × 6 categories)
+    │       Optional: --preview generates 3 visual variants
+    │
+    ├─► Generation
+    │       PostToolUse hook auto-validates .pptx output
+    │
+    └─► Optional: --refine loop (max 2 iterations)
+            slide-qa agent inspects → fixes → re-inspects
 ```
 
 ---
 
-## Tools
+## Engines
 
-### `slide_factory.py`
+| Engine | Best For | Output | Dependencies |
+|--------|----------|--------|--------------|
+| **Marp** | Quick markdown slides | HTML, PDF, PPTX (image) | marp-cli (npm) |
+| **python-pptx** | Programmatic, styled | PPTX (editable) | python-pptx (pip) |
+| **md2pptx** | Markdown→PowerPoint | PPTX (editable) | Bundled |
+| **reveal.js** | Web presentations | HTML | pandoc |
+| **Beamer** | Academic LaTeX | PDF | pdflatex |
+| **HTML** | Zero-dep browser | HTML | None |
+| **RISE** | Jupyter notebooks | HTML | Jupyter |
 
-Production-ready `python-pptx` helper. Creates styled 16:9 presentations with proper header/footer, bullet styling, and image fitting. The default engine for `/slides` without flags.
+**Engine auto-resolution** (when `--engine` is omitted):
 
-### `validate_pptx.py`
-
-Structural inspection CLI for PPTX outputs. Checks aspect ratio, font consistency, title slide presence, and slide count. Run automatically after python-pptx generation:
-
-```bash
-python3 modules/slides/tools/validate_pptx.py output.pptx
+```
+--format pptx                → python-pptx + SlideFactory (default)
+--format pptx --template X   → md2pptx (template-first)
+--format html                → Marp
+--format html --interactive  → reveal.js
+--format pdf                 → Marp
+--format pdf --academic      → Beamer
+--format notebook            → RISE
 ```
 
-### `thumbnail_grid.py`
+---
 
-Generates a thumbnail grid image from a PPTX or HTML slide deck. Useful for quick visual review and style comparison.
+## Styles
 
-### `html2pptx/`
+30 styles across 6 categories. Use `--style <name>` or describe your look and the engine selects the best match.
 
-Pipeline for converting HTML slides to PPTX format. Handles layout preservation and image extraction.
+| Category | Count | Aesthetic |
+|----------|-------|-----------|
+| **Corporate** | 5 | Professional, brand-safe, boardroom-ready |
+| **Academic** | 5 | Clean, readable, conference-appropriate |
+| **Creative** | 5 | Bold, expressive, high visual impact |
+| **Technical** | 5 | Code-friendly, dark themes, developer-focused |
+| **Elegant** | 5 | Minimal, refined, premium feel |
+| **Specialty** | 5 | Purpose-built for pitch decks, data stories, workshops |
 
-### `pptx_editor/`
+Full style descriptions, color palettes, and typography specs: [handbook/style-catalog.md](handbook/style-catalog.md)
 
-Utilities for programmatic PPTX editing — modify existing decks, update text, swap images, adjust layouts.
-
-### `md2pptx/`
-
-Bundled standalone script (NOT on PyPI — do not `pip install md2pptx`). Converts Markdown to editable PPTX via a template-first approach.
-
-```bash
-# Correct invocation
-python3 modules/slides/tools/md2pptx/md2pptx.py output.pptx < slides.md
-
-# After astraeus load slides
-python3 .claude/tools/md2pptx/md2pptx.py output.pptx < slides.md
-```
-
-Requires: `pip install python-pptx`
+Use `--preview` to generate 2–3 style variants before committing to a full deck.
 
 ---
 
 ## Dependencies
 
-All dependencies are optional — the module loads cleanly with none installed.
+```
+Core: pip install python-pptx
+QA:   pip install slides[qa]       # Pillow for thumbnail grids
+Full: pip install slides[all]      # Pillow + Playwright
+```
 
-| Dependency | Install | Required By |
-|------------|---------|-------------|
-| `python-pptx` | `pip install python-pptx` | md2pptx, python-pptx engine, slide_factory |
+Optional runtime tools:
+
+| Tool | Install | Required By |
+|------|---------|-------------|
 | `marp-cli` | `npm install -g @marp-team/marp-cli` | Marp engine |
 | `pandoc` | [pandoc.org](https://pandoc.org/) | reveal.js, Beamer |
 | `pdflatex` | TeX Live or MiKTeX | Beamer engine |
-| `Chromium` | System package | Marp PDF/PPTX (headless), visual QA |
+| `Chromium` | System package | Marp PDF/PPTX, visual QA |
 | `rise` | `pip install rise` | RISE/Jupyter engine |
+
+All dependencies are optional — engines degrade gracefully with install guidance when unavailable.
 
 ---
 
-## Module Management
+## Philosophy
 
-```bash
-astraeus load slides      # Load into project
-astraeus unload slides    # Clean removal (symlinks only)
-astraeus list             # Verify module is registered
-```
+- **Workflow over Capability** — Models improve; workflow skills get better with them
+- **Progressive Disclosure** — 318-line core loads 9 reference files on demand, not 1,650 lines upfront
+- **Producer ≠ Verifier** — slide-designer generates, slide-qa inspects independently
+- **Anti-AI-Slop** — Banned fonts (Inter, Roboto, Arial), banned colors (#6366f1), distinctive presets enforce visual identity
+
+---
+
+## Contributing
+
+1. Fork → branch → PR
+2. Keep skills under 400 lines (use phase-loading for depth)
+3. New styles must pass the anti-slop checklist in `presentation-design-styles`
+4. Run `python3 tools/validate_pptx.py` on any PPTX output before submitting
+
+---
+
+## License
+
+MIT © rooftop-Owl
+
+---
+
+## Star History
+
+[![Star History](https://api.star-history.com/svg?repos=rooftop-Owl/slides&type=Date)](https://star-history.com/#rooftop-Owl/slides&Date)

@@ -1,0 +1,26 @@
+name: Bug Report
+description: Report a slideaway plugin issue
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug clearly
+    validations:
+      required: true
+  - type: input
+    id: engine
+    attributes:
+      label: Which engine?
+      placeholder: "python-pptx / Marp / HTML / reveal.js / Beamer / md2pptx / RISE"
+  - type: input
+    id: version
+    attributes:
+      label: Plugin version
+      placeholder: "2.0.0"
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: "Claude Code / Codex / Cursor"

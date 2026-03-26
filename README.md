@@ -1,15 +1,15 @@
-# 🎯 Slides
+# 🎯 Slideaway
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-2.0.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/engines-7-green?style=for-the-badge" alt="7 Engines">
   <img src="https://img.shields.io/badge/styles-30-purple?style=for-the-badge" alt="30 Styles">
   <img src="https://img.shields.io/badge/skills-3-orange?style=for-the-badge" alt="3 Skills">
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/rooftop-Owl/slides?style=for-the-badge&color=green" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/rooftop-Owl/slideaway?style=for-the-badge&color=green" alt="License"></a>
 </p>
 
 <p align="center">
-  A 7-engine presentation plugin for Claude Code — generates PPTX, HTML, reveal.js, Beamer, and Marp decks with 30 curated styles, anti-AI-slop heuristics, and opt-in design refinement.
+  Slides, away from your to-do list.
 </p>
 
 ---
@@ -17,8 +17,8 @@
 ## Installation
 
 ```bash
-/plugin marketplace add rooftop-Owl/slides
-/plugin install slides@slides-marketplace
+/plugin marketplace add rooftop-Owl/slideaway
+/plugin install slideaway@slideaway-marketplace
 ```
 
 After installing, the `/slides` command, 3 skills, and 2 agents are immediately available in your Claude Code session. No configuration required — engines degrade gracefully if optional dependencies are missing.
@@ -26,9 +26,9 @@ After installing, the `/slides` command, 3 skills, and 2 agents are immediately 
 
 ---
 
-## Why Slides?
+## Why Slideaway?
 
-Most presentation tools generate generic AI output. Slides enforces quality through architecture:
+Most presentation tools generate generic AI output. Slideaway enforces quality through architecture:
 
 - **7 engines** — choose the right tool for every context (quick preview vs. polished boardroom deck vs. academic PDF)
 - **30 curated styles** — every preset was designed to avoid the "AI generated" look
@@ -209,8 +209,8 @@ Use `--preview` to generate 2–3 style variants before committing to a full dec
 
 ```
 Core: pip install python-pptx
-QA:   pip install slides[qa]       # Pillow for thumbnail grids
-Full: pip install slides[all]      # Pillow + Playwright
+QA:   pip install slideaway[qa]       # Pillow for thumbnail grids
+Full: pip install slideaway[all]      # Pillow + Playwright
 ```
 
 Optional runtime tools:
@@ -253,4 +253,4 @@ MIT © rooftop-Owl
 
 ## Star History
 
-[![Star History](https://api.star-history.com/svg?repos=rooftop-Owl/slides&type=Date)](https://star-history.com/#rooftop-Owl/slides&Date)
+[![Star History](https://api.star-history.com/svg?repos=rooftop-Owl/slideaway&type=Date)](https://star-history.com/#rooftop-Owl/slideaway&Date)

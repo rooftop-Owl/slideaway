@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "slides-marketplace",
+  "name": "slideaway-marketplace",
   "owner": { "name": "rooftop-Owl" },
   "metadata": {
     "description": "Presentation armory — 7 engines, 30 styles, progressive disclosure",
@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "slides",
+      "name": "slideaway",
       "source": "./",
       "description": "7-engine presentation plugin with 30 curated styles, progressive disclosure skill architecture, anti-AI-slop heuristics, and opt-in style preview + refinement loops. Generates PPTX, HTML, reveal.js, Beamer, and Marp decks from natural language.",
       "version": "2.0.0",
@@ -17,7 +17,7 @@
       "keywords": ["slides", "presentation", "pptx", "design", "visual", "beamer", "marp", "reveal-js", "claude-code"],
       "category": "design",
       "tags": ["slide-generation", "presentation-design", "visual-qa", "progressive-disclosure", "anti-ai-slop"],
-      "homepage": "https://github.com/rooftop-Owl/slides"
+      "homepage": "https://github.com/rooftop-Owl/slideaway"
     }
   ]
 }

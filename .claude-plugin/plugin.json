@@ -1,11 +1,11 @@
 {
-  "name": "slides",
+  "name": "slideaway",
   "version": "2.0.0",
   "author": { "name": "rooftop-Owl" },
   "license": "MIT",
   "description": "Presentation armory — 7 engines for slides, posters, and visual output. Plugin-native with agents, hooks, and progressive disclosure skills.",
-  "homepage": "https://github.com/rooftop-Owl/slides",
-  "repository": "https://github.com/rooftop-Owl/slides",
+  "homepage": "https://github.com/rooftop-Owl/slideaway",
+  "repository": "https://github.com/rooftop-Owl/slideaway",
   "keywords": [
     "slides",
     "presentation",

@@ -1,5 +1,5 @@
 [project]
-name = "slides"
+name = "slideaway"
 version = "2.0.0"
 description = "Presentation armory — 7 engines, 30 styles, progressive disclosure. Claude Code plugin for slides, posters, and visual output."
 readme = "README.md"
@@ -18,5 +18,5 @@ browser = ["playwright>=1.40.0"]
 all = ["Pillow>=10.0.0", "playwright>=1.40.0"]
 
 [project.urls]
-Homepage = "https://github.com/rooftop-Owl/slides"
-Repository = "https://github.com/rooftop-Owl/slides"
+Homepage = "https://github.com/rooftop-Owl/slideaway"
+Repository = "https://github.com/rooftop-Owl/slideaway"

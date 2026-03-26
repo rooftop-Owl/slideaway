@@ -1,0 +1,75 @@
+{
+  "name": "slides",
+  "version": "1.1.0",
+  "type": "tool-adapter",
+  "workflow": "atomic",
+  "description": "Presentation armory — 7 engines for slides, posters, and visual output",
+  "_deprecated": "Use .claude-plugin/plugin.json. Kept for astraeus load compatibility.",
+  "tool": {
+    "canonical": "slides",
+    "category": "presentation",
+    "package": {
+      "name": "slides",
+      "check": "marp --version 2>/dev/null || pandoc --version 2>/dev/null || python3 -c 'import pptx' 2>/dev/null"
+    },
+    "capabilities": [
+      "slide-generation",
+      "markdown-to-pptx",
+      "pdf-handouts",
+      "html-presentation",
+      "beamer-latex",
+      "reveal-js",
+      "jupyter-slides"
+    ],
+    "inputs": ["markdown:md", "template:css", "content:text"],
+    "outputs": ["slides:pptx", "slides:pdf", "slides:html", "slides:tex"],
+    "composable_with": ["paper-writing", "research-core"]
+  },
+  "provides": {
+    "skills": ["slide-generation", "presentation-design-styles", "presentation-visual-qa"],
+    "commands": ["slides"]
+  },
+  "requires": {
+    "astraeus": ">=0.8.0"
+  },
+  "dependencies": {
+    "runtime": {
+      "marp-cli": {
+        "check": "npm list -g @marp-team/marp-cli 2>/dev/null || marp --version 2>/dev/null",
+        "install": "npm install -g @marp-team/marp-cli",
+        "required": false,
+        "engines": ["marp"]
+      },
+      "chromium": {
+        "check": "which chromium-browser || which google-chrome || which chromium 2>/dev/null",
+        "required": false,
+        "note": "Required for Marp PDF/PPTX. On headless Linux: MARP_OPTS='--no-sandbox'"
+      },
+      "python-pptx": {
+        "check": "python3 -c 'import pptx; print(pptx.__version__)'",
+        "install": "pip install python-pptx",
+        "required": false,
+        "engines": ["python-pptx", "md2pptx"]
+      },
+      "md2pptx": {
+        "check": "test -f modules/slides/tools/md2pptx/md2pptx.py 2>/dev/null && echo 'bundled'",
+        "install": "git clone https://github.com/MartinPacker/md2pptx.git modules/slides/tools/md2pptx",
+        "required": false,
+        "note": "Standalone script — not on PyPI. Bundled via git clone into tools/md2pptx/. Requires python-pptx.",
+        "engines": ["md2pptx"]
+      },
+      "pandoc": {
+        "check": "pandoc --version 2>/dev/null",
+        "install": "See https://pandoc.org/installing.html",
+        "required": false,
+        "engines": ["reveal", "beamer"]
+      },
+      "pdflatex": {
+        "check": "pdflatex --version 2>/dev/null",
+        "install": "Install TeX Live or MiKTeX",
+        "required": false,
+        "engines": ["beamer"]
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+# Core (required for python-pptx engine)
+python-pptx>=1.0.0
+
+# Optional — install for the features you need
+# pip install slides[qa]       → visual QA thumbnail grids
+# pip install slides[browser]  → Playwright-based rendering
+
+# Pillow — for thumbnail_grid.py (visual QA overview grids)
+# Pillow>=10.0.0
+
+# Playwright — for Path B rendering in visual QA skill
+# playwright>=1.40.0

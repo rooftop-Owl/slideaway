@@ -1,0 +1,28 @@
+{
+  "name": "slides",
+  "version": "2.0.0",
+  "author": "rooftop-Owl",
+  "license": "MIT",
+  "description": "Presentation armory — 7 engines for slides, posters, and visual output. Plugin-native with agents, hooks, and progressive disclosure skills.",
+  "homepage": "https://github.com/rooftop-Owl/astraeus/tree/main/modules/slides",
+  "keywords": [
+    "slides",
+    "presentation",
+    "pptx",
+    "plugin",
+    "design",
+    "visual"
+  ],
+  "agents": {
+    "path": "agents"
+  },
+  "hooks": {
+    "path": "hooks"
+  },
+  "skills": {
+    "path": "skills"
+  },
+  "commands": {
+    "path": "commands"
+  }
+}

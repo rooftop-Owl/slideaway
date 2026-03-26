@@ -1,0 +1,32 @@
+/* GOTCHA: -clamp() is silently ignored. Use calc(-1 * clamp(...)) instead */
+/* Theme: Modern Dark - Minimal dark mode with clean white accents. */
+/* Adapted from vkehfdl1/slides-grab (MIT license) */
+
+:root {
+  --bg-primary: #0f0f0f;
+  --bg-secondary: #1a1a1a;
+  --bg-dark: #000000;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-light: #ffffff;
+  --accent: #ffffff;
+  --border: #333333;
+
+  /* Typography */
+  --font-heading: ui-sans-serif, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-body: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+
+  /* Spacing */
+  --slide-padding: 48px;
+  --content-gap: 24px;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

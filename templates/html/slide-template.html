@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide Title</title>
+  <style>
+    :root {
+      --slide-bg: #fafaf8;
+      --slide-fg: #1a1a1a;
+      --slide-accent: #1e3a5f;
+      --slide-secondary: #5a6a7a;
+      --slide-width: 1280px;
+      --slide-height: 720px;
+      --font-heading: ui-serif, Georgia, "Noto Serif", "Liberation Serif", "Times New Roman", serif;
+      --font-body: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", "Fira Code", Menlo, monospace;
+      --c-border: rgba(90, 106, 122, 0.25);
+      --c-code-bg: rgba(90, 106, 122, 0.15);
+      --c-stripe: rgba(90, 106, 122, 0.08);
+    }
+
+    @supports (background: color-mix(in srgb, red 50%, blue)) {
+      :root {
+        --c-border: color-mix(in srgb, var(--slide-secondary) 25%, transparent);
+        --c-code-bg: color-mix(in srgb, var(--slide-secondary) 15%, transparent);
+        --c-stripe: color-mix(in srgb, var(--slide-secondary) 8%, transparent);
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --slide-bg: #0f172a;
+        --slide-fg: #e2e8f0;
+        --slide-accent: #7ba7d9;
+        --slide-secondary: #94a3b8;
+        --c-border: rgba(148, 163, 184, 0.25);
+        --c-code-bg: rgba(148, 163, 184, 0.15);
+        --c-stripe: rgba(148, 163, 184, 0.08);
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: #1e293b;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .slide {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      max-width: 100%;
+      aspect-ratio: 16 / 9;
+      background: var(--slide-bg);
+      background-image: radial-gradient(circle, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+      background-size: 24px 24px;
+      color: var(--slide-fg);
+      padding: 48px 72px 40px;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide-header {
+      padding-left: 20px;
+      border-left: 4px solid var(--slide-accent);
+      margin-bottom: 28px;
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      color: var(--slide-accent);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    h2 {
+      font-family: var(--font-body);
+      font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+      color: var(--slide-secondary);
+      font-weight: 400;
+      margin-top: 6px;
+    }
+
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      font-size: clamp(1.04rem, 2.6vw, 1.56rem);
+      line-height: 1.7;
+    }
+
+    ul, ol { margin-left: 1.5em; }
+    li { margin-bottom: 0.5em; }
+    li::marker { color: var(--slide-accent); }
+
+    .slide-footer {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      margin-top: auto;
+      border-top: 1px solid var(--c-border);
+      font-size: clamp(0.6rem, 1.5vw, 0.9rem);
+      color: var(--slide-secondary);
+    }
+
+    .slide-footer .meta { font-style: italic; }
+    .slide-footer .page { font-variant-numeric: tabular-nums; }
+
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    pre {
+      background: var(--slide-accent);
+      color: #e2e8f0;
+      padding: 1em;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: clamp(0.68rem, 1.7vw, 1.02rem);
+      overflow: auto;
+    }
+
+    code {
+      background: var(--c-code-bg);
+      color: var(--slide-accent);
+      padding: 0.1em 0.3em;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: clamp(0.72em, 1.8vw, 1.08em);
+    }
+
+    pre code { background: none; color: inherit; padding: 0; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: clamp(0.72em, 1.8vw, 1.08em); }
+    th { background: var(--slide-accent); color: #ffffff; padding: 8px 12px; text-align: left; font-weight: 600; }
+    td { padding: 6px 12px; border-bottom: 1px solid var(--c-border); }
+    tr:nth-child(even) td { background: var(--c-stripe); }
+
+    /* Blockquotes */
+    blockquote {
+      border-left: 4px solid var(--slide-accent);
+      padding-left: 1em;
+      color: var(--slide-secondary);
+      font-style: italic;
+      margin: 1em 0;
+    }
+
+    /* Title Slide */
+    .slide--title {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background-image: none;
+      background: #1e3a5f;
+      background: linear-gradient(135deg, var(--slide-accent) 0%, #142a45 100%);
+      color: #ffffff;
+    }
+
+    .slide--title .slide-header { border-left: none; padding-left: 0; }
+    .slide--title h1 { color: #ffffff; font-size: clamp(2.2rem, 4vw, 3rem); }
+    .slide--title h2 { color: rgba(255, 255, 255, 0.8); }
+    .slide--title .slide-footer { border-top-color: rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.6); }
+
+    /* Section Break — diagonal stripes distinguish from title */
+    .slide--section {
+      justify-content: center;
+      background: var(--slide-accent);
+      color: #ffffff;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 40px,
+        rgba(255, 255, 255, 0.04) 40px,
+        rgba(255, 255, 255, 0.04) 80px
+      );
+    }
+
+    .slide--section .slide-header {
+      border-left-color: rgba(255, 255, 255, 0.5);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 16px;
+    }
+
+    .slide--section h1 { color: #ffffff; font-size: clamp(2rem, 3.5vw, 2.8rem); }
+    .slide--section h2 { color: rgba(255, 255, 255, 0.7); }
+    .slide--section .slide-footer { border-top-color: rgba(255, 255, 255, 0.15); color: rgba(255, 255, 255, 0.5); }
+
+    /* Split (Two-Column) */
+    .slide--split .slide-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    @media print {
+      @page { size: 1280px 720px; margin: 0; }
+      body { background: white; padding: 0; }
+      .slide {
+        box-shadow: none;
+        border: none;
+        page-break-after: always;
+        break-after: page;
+        background-image: none;
+      }
+      .slide--title, .slide--section {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .slide { padding: 32px 40px 28px; }
+      h1 { font-size: clamp(1.4rem, 5vw, 1.8rem); }
+      h2 { font-size: clamp(0.8rem, 3vw, 0.95rem); }
+      .slide-content { font-size: clamp(0.8rem, 2.0vw, 1.2rem); line-height: 1.6; }
+      .slide-footer { font-size: clamp(0.52rem, 1.3vw, 0.78rem); }
+      .slide--split .slide-content { grid-template-columns: 1fr; gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+    <div class="slide-header">
+      <h1>Slide Title</h1>
+      <h2>Subtitle or author — Institution</h2>
+    </div>
+
+    <div class="slide-content">
+      <ul>
+        <li>Key point one with supporting detail</li>
+        <li>Key point two — lead with the conclusion</li>
+        <li>Key point three — max 6 bullets per slide</li>
+      </ul>
+    </div>
+
+    <div class="slide-footer">
+      <span class="meta">Author · Event · Date</span>
+      <span class="page">1 / N</span>
+    </div>
+  </div>
+</body>
+</html>

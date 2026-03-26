@@ -1,0 +1,32 @@
+/* GOTCHA: -clamp() is silently ignored. Use calc(-1 * clamp(...)) instead */
+/* Theme: Sage - Soft green palette for calm business decks. */
+/* Adapted from vkehfdl1/slides-grab (MIT license) */
+
+:root {
+  --bg-primary: #b8c4b8;
+  --bg-secondary: #a3b0a3;
+  --bg-dark: #2f3a2f;
+  --text-primary: #1a1a1a;
+  --text-secondary: #3d3d3d;
+  --text-light: #f8faf8;
+  --accent: #2d2d2d;
+  --border: #9aa89a;
+
+  /* Typography */
+  --font-heading: ui-sans-serif, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-body: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+
+  /* Spacing */
+  --slide-padding: 48px;
+  --content-gap: 24px;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

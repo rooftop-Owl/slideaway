@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide Deck</title>
+  <style>
+    /* ─── Theme Variables (Executive preset by default) ─────────────────────── */
+    :root {
+      --bg-primary:    #FFFFFF;
+      --bg-secondary:  #F4F6F9;
+      --bg-dark:       #1A3A5C;
+      --text-primary:  #0D1B2A;
+      --text-secondary:#5A6A7A;
+      --text-light:    #FFFFFF;
+      --accent:        #E8861A;
+      --border:        #D8E0EA;
+
+      /* Internal layout tokens */
+      --slide-width:   1280px;
+      --slide-height:  720px;
+      --font-heading:  ui-serif, Georgia, "Noto Serif", "Liberation Serif", serif;
+      --font-body:     ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono:     ui-monospace, "SFMono-Regular", "Cascadia Code", "Fira Code", Menlo, monospace;
+    }
+
+    /* ─── Reset ──────────────────────────────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ─── Scroll-Snap Container ──────────────────────────────────────────────── */
+    html {
+      height: 100%;
+    }
+
+    body {
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font-body);
+      background: #111827;
+    }
+
+    .deck-viewport {
+      height: 100vh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+      /* Hide scrollbar visually while keeping functionality */
+      scrollbar-width: none;
+    }
+
+    .deck-viewport::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* ─── Slide Shell ────────────────────────────────────────────────────────── */
+    .slide {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111827;
+      position: relative;
+    }
+
+    /* ─── Slide Inner (the 16:9 canvas) ─────────────────────────────────────── */
+    .slide-inner {
+      width: min(var(--slide-width), 95vw);
+      aspect-ratio: 16 / 9;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 52px 72px 44px;
+      position: relative;
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.04);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-size: clamp(0.75rem, 1.2vw, 1.1rem);
+    }
+
+    /* ─── Slide Header ───────────────────────────────────────────────────────── */
+    .slide-header {
+      flex-shrink: 0;
+      margin-bottom: 28px;
+    }
+
+    .slide-header h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.6em, 2.8vw, 2.4em);
+      font-weight: 700;
+      color: var(--bg-dark);
+      line-height: 1.15;
+    }
+
+    .slide-header h2 {
+      font-size: clamp(0.8em, 1.2vw, 1em);
+      font-weight: 400;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    /* ─── Slide Body ─────────────────────────────────────────────────────────── */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      line-height: 1.7;
+    }
+
+    .slide-body ul,
+    .slide-body ol {
+      margin-left: 1.6em;
+    }
+
+    .slide-body li {
+      margin-bottom: 0.5em;
+    }
+
+    .slide-body li::marker {
+      color: var(--accent);
+    }
+
+    .slide-body p {
+      margin-bottom: 0.8em;
+    }
+
+    /* ─── Slide Footer ───────────────────────────────────────────────────────── */
+    .slide-footer {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 14px;
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+      font-size: clamp(0.58em, 1.44vw, 0.86em);
+      color: var(--text-secondary);
+    }
+
+    .slide-footer .meta { font-style: italic; }
+    .slide-footer .counter { font-variant-numeric: tabular-nums; }
+
+    /* ─── Variant: Title Slide ───────────────────────────────────────────────── */
+    .slide-inner--title {
+      background: var(--bg-dark);
+      background: linear-gradient(140deg, var(--bg-dark) 0%, color-mix(in srgb, var(--bg-dark) 70%, #000) 100%);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: var(--text-light);
+    }
+
+    .slide-inner--title .slide-header {
+      margin-bottom: 0;
+    }
+
+    .slide-inner--title .slide-header h1 {
+      color: var(--text-light);
+      font-size: clamp(2em, 3.6vw, 3.2em);
+    }
+
+    .slide-inner--title .slide-header h2 {
+      color: rgba(255, 255, 255, 0.72);
+      margin-top: 12px;
+      font-size: clamp(0.85em, 1.3vw, 1.1em);
+    }
+
+    .slide-inner--title .slide-footer {
+      position: absolute;
+      bottom: 44px;
+      left: 72px;
+      right: 72px;
+      border-top-color: rgba(255, 255, 255, 0.18);
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* ─── Variant: Section Break ─────────────────────────────────────────────── */
+    .slide-inner--section {
+      background: var(--accent);
+      justify-content: center;
+      color: var(--text-light);
+    }
+
+    .slide-inner--section .slide-header h1 {
+      color: var(--text-light);
+      font-size: clamp(1.8em, 3.2vw, 2.8em);
+    }
+
+    .slide-inner--section .slide-header h2 {
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .slide-inner--section .slide-footer {
+      border-top-color: rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    /* ─── Variant: Split (Two-Column) ────────────────────────────────────────── */
+    .slide-inner--split .slide-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    .slide-body h3 {
+      font-family: var(--font-heading);
+      font-size: clamp(0.84em, 2.1vw, 1.26em);
+      font-weight: 600;
+      color: var(--bg-dark);
+      margin-bottom: 0.5em;
+    }
+
+    /* ─── Tables ─────────────────────────────────────────────────────────────── */
+    .slide-body table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: clamp(0.72em, 1.8vw, 1.08em);
+    }
+
+    .slide-body th {
+      background: var(--bg-dark);
+      color: var(--text-light);
+      padding: 7px 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .slide-body td {
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .slide-body tr:nth-child(even) td {
+      background: var(--bg-secondary);
+    }
+
+    /* ─── Code Blocks ────────────────────────────────────────────────────────── */
+    .slide-body pre {
+      background: var(--bg-dark);
+      color: #e2e8f0;
+      padding: 1em;
+      border-radius: 5px;
+      font-family: var(--font-mono);
+      font-size: clamp(0.68em, 1.7vw, 1.02em);
+      overflow: auto;
+    }
+
+    .slide-body code {
+      background: var(--bg-secondary);
+      color: var(--accent);
+      padding: 0.1em 0.3em;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: clamp(0.72em, 1.8vw, 1.08em);
+    }
+
+    .slide-body pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+    }
+
+    /* ─── Progress Bar ───────────────────────────────────────────────────────── */
+    .deck-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.25s ease;
+      z-index: 200;
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* ─── Slide Counter HUD ──────────────────────────────────────────────────── */
+    .deck-hud {
+      position: fixed;
+      bottom: 20px;
+      right: 24px;
+      z-index: 200;
+      background: rgba(0, 0, 0, 0.55);
+      color: rgba(255, 255, 255, 0.8);
+      font-family: var(--font-body);
+      font-size: clamp(9.6px, 1.5vw, 14.4px);
+      font-variant-numeric: tabular-nums;
+      padding: 5px 10px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      pointer-events: none;
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── Print ──────────────────────────────────────────────────────────────── */
+    @media print {
+      .deck-viewport {
+        overflow: visible;
+        height: auto;
+        scroll-snap-type: none;
+      }
+
+      body {
+        overflow: auto;
+        background: white;
+      }
+
+      .slide {
+        height: auto;
+        page-break-after: always;
+        break-after: page;
+        background: white;
+      }
+
+      .slide-inner {
+        width: 100%;
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      .slide-inner--title,
+      .slide-inner--section {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .deck-progress,
+      .deck-hud {
+        display: none;
+      }
+    }
+
+    /* ─── Responsive ─────────────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .slide-inner {
+        padding: 32px 36px 28px;
+      }
+
+      .slide-inner--split .slide-body {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Progress bar -->
+  <div class="deck-progress" id="deckProgress" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+
+  <!-- Slide counter HUD -->
+  <div class="deck-hud" id="deckHud" aria-live="polite">1 / 4</div>
+
+  <!-- ──────────────────────────────────────────────────────────────────────── -->
+  <!-- Scroll-snap viewport: scroll-snap-type: y mandatory is set on this div  -->
+  <!-- ──────────────────────────────────────────────────────────────────────── -->
+  <div class="deck-viewport slide-deck" id="deckViewport" role="main">
+
+    <!-- Slide 1: Title -->
+    <section class="slide" id="slide-1" aria-label="Slide 1 of 4">
+      <div class="slide-inner slide-inner--title">
+        <div class="slide-header">
+          <h1>Presentation Title</h1>
+          <h2>Author Name &middot; Organization &middot; Date</h2>
+        </div>
+        <div class="slide-body"></div>
+        <footer class="slide-footer">
+          <span class="meta">Conference or Event Name</span>
+          <span class="counter">1 / 4</span>
+        </footer>
+      </div>
+    </section>
+
+    <!-- Slide 2: Content -->
+    <section class="slide" id="slide-2" aria-label="Slide 2 of 4">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <h1>Core Finding Stated as a Claim</h1>
+          <h2>Supporting context or measurement period</h2>
+        </div>
+        <div class="slide-body">
+          <ul>
+            <li>Lead with the conclusion — audiences skim headings first</li>
+            <li>Each bullet supports the title claim with evidence or data</li>
+            <li>Limit to five bullets maximum; three is often enough</li>
+            <li>Write bullets as complete thoughts, not noun fragments</li>
+            <li>Use parallel grammatical structure across all bullets</li>
+          </ul>
+        </div>
+        <footer class="slide-footer">
+          <span class="meta">Author &middot; Event &middot; Date</span>
+          <span class="counter">2 / 4</span>
+        </footer>
+      </div>
+    </section>
+
+    <!-- Slide 3: Section Break -->
+    <section class="slide" id="slide-3" aria-label="Slide 3 of 4">
+      <div class="slide-inner slide-inner--section">
+        <div class="slide-header">
+          <h1>Part Two</h1>
+          <h2>Transition to the next major topic area</h2>
+        </div>
+        <div class="slide-body"></div>
+        <footer class="slide-footer">
+          <span class="meta"></span>
+          <span class="counter">3 / 4</span>
+        </footer>
+      </div>
+    </section>
+
+    <!-- Slide 4: Split -->
+    <section class="slide" id="slide-4" aria-label="Slide 4 of 4">
+      <div class="slide-inner slide-inner--split">
+        <div class="slide-header">
+          <h1>Comparison or Before &amp; After</h1>
+          <h2>Two-column layout for contrast or parallel analysis</h2>
+        </div>
+        <div class="slide-body">
+          <div>
+            <h3>Option A</h3>
+            <ul>
+              <li>First attribute or advantage</li>
+              <li>Trade-off or limitation</li>
+              <li>When to prefer this path</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Option B</h3>
+            <ul>
+              <li>Distinguishing characteristic</li>
+              <li>Corresponding trade-off</li>
+              <li>Optimal use case</li>
+            </ul>
+          </div>
+        </div>
+        <footer class="slide-footer">
+          <span class="meta">Author &middot; Event &middot; Date</span>
+          <span class="counter">4 / 4</span>
+        </footer>
+      </div>
+    </section>
+
+  </div><!-- /.deck-viewport -->
+
+  <script src="scripts/slide-nav.js"></script>
+  <script>
+    new SlidePresentation('.slide-deck');
+  </script>
+
+</body>
+</html>

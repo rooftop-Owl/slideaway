@@ -1,0 +1,32 @@
+# Marp CLI Reference Configuration
+# Copy this file to your project root to use astraeus slide themes.
+#
+# Usage:
+#   marp --config .marprc.yml slides.md
+#
+# Theme resolution:
+#   --theme-set requires an ABSOLUTE path (relative paths fail from subdirectories).
+#   The themeSet below assumes standard astraeus module location.
+#   Adjust the path if your project layout differs.
+#
+# Available themes: slides-default, academic
+
+theme: slides-default
+
+# Theme search paths (absolute paths recommended)
+# Uncomment and adjust to your astraeus installation path:
+# themeSet:
+#   - /home/user/astraeus/modules/slides/templates/marp/
+
+# Bespoke presentation options
+bespoke:
+  osc: false        # Disable on-screen controller (shows in screenshots/exports)
+  progress: false   # Disable progress bar (renders as black stripe on PDF)
+
+# Output options (uncomment as needed)
+# output: output.html
+# pdf: true
+# pptx: true
+
+# HTML rendering — allow raw HTML in Markdown
+html: true

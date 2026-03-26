@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide Deck Review</title>
+  <style>
+    /* GOTCHA: -clamp() is silently ignored. Use calc(-1 * clamp(...)) instead */
+
+    :root {
+      --slide-bg: #fafaf8;
+      --slide-fg: #1a1a1a;
+      --slide-accent: #1e3a5f;
+      --slide-secondary: #5a6a7a;
+      --slide-width: 1280px;
+      --slide-height: 720px;
+      --font-heading: ui-serif, Georgia, "Noto Serif", "Liberation Serif", "Times New Roman", serif;
+      --font-body: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", "Fira Code", Menlo, monospace;
+      --c-border: rgba(90, 106, 122, 0.25);
+      --c-code-bg: rgba(90, 106, 122, 0.15);
+      --c-stripe: rgba(90, 106, 122, 0.08);
+      --deck-bg: #1e293b;
+      --deck-nav-bg: rgba(15, 23, 42, 0.95);
+      --deck-text: #94a3b8;
+      --deck-text-bright: #e2e8f0;
+      --deck-text-dim: #475569;
+      --deck-text-muted: #64748b;
+      --deck-nav-border: rgba(255, 255, 255, 0.1);
+      --deck-toc-hover: rgba(255, 255, 255, 0.1);
+    }
+
+    @supports (background: color-mix(in srgb, red 50%, blue)) {
+      :root {
+        --c-border: color-mix(in srgb, var(--slide-secondary) 25%, transparent);
+        --c-code-bg: color-mix(in srgb, var(--slide-secondary) 15%, transparent);
+        --c-stripe: color-mix(in srgb, var(--slide-secondary) 8%, transparent);
+      }
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --deck-bg: #f1f5f9;
+        --deck-nav-bg: rgba(255, 255, 255, 0.95);
+        --deck-text: #475569;
+        --deck-text-bright: #1e293b;
+        --deck-text-dim: #94a3b8;
+        --deck-text-muted: #64748b;
+        --deck-nav-border: rgba(0, 0, 0, 0.1);
+        --deck-toc-hover: rgba(0, 0, 0, 0.05);
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--deck-bg);
+      color: var(--deck-text);
+      min-height: 100vh;
+    }
+
+    .deck-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--deck-nav-bg);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--deck-nav-border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .deck-nav h1 {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      color: var(--deck-text-bright);
+      font-weight: 600;
+    }
+
+    .deck-meta {
+      font-size: 0.8rem;
+      color: var(--deck-text-muted);
+      display: flex;
+      gap: 16px;
+    }
+
+    .deck-toc {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .deck-toc a {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      border-radius: 4px;
+      color: var(--deck-text);
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .deck-toc a:hover {
+      background: var(--deck-toc-hover);
+      color: var(--deck-text-bright);
+    }
+
+    .deck-slides {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      padding: 32px 24px 64px;
+    }
+
+    .deck-slide-wrapper { scroll-margin-top: 64px; }
+
+    .deck-slide-number {
+      font-size: 0.7rem;
+      color: var(--deck-text-dim);
+      text-align: center;
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slide {
+      width: var(--slide-width);
+      height: var(--slide-height);
+      max-width: 100%;
+      aspect-ratio: 16 / 9;
+      background: var(--slide-bg);
+      background-image: radial-gradient(circle, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+      background-size: 24px 24px;
+      color: var(--slide-fg);
+      padding: 48px 72px 40px;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide-header {
+      padding-left: 20px;
+      border-left: 4px solid var(--slide-accent);
+      margin-bottom: 28px;
+      flex-shrink: 0;
+    }
+
+    .slide h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      color: var(--slide-accent);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .slide h2 {
+      font-family: var(--font-body);
+      font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+      color: var(--slide-secondary);
+      font-weight: 400;
+      margin-top: 6px;
+    }
+
+    .slide h3 {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      color: var(--slide-accent);
+      font-weight: 600;
+      margin-bottom: 0.5em;
+    }
+
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      font-size: 1.3rem;
+      line-height: 1.7;
+    }
+
+    .slide ul, .slide ol { margin-left: 1.5em; }
+    .slide li { margin-bottom: 0.5em; }
+    .slide li::marker { color: var(--slide-accent); }
+
+    .slide-footer {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      margin-top: auto;
+      border-top: 1px solid var(--c-border);
+      font-size: 0.75rem;
+      color: var(--slide-secondary);
+    }
+
+    .slide-footer .meta { font-style: italic; }
+    .slide-footer .page { font-variant-numeric: tabular-nums; }
+
+    /* Title */
+    .slide--title {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background-image: none;
+      background: #1e3a5f;
+      background: linear-gradient(135deg, var(--slide-accent) 0%, #142a45 100%);
+      color: #ffffff;
+    }
+
+    .slide--title .slide-header { border-left: none; padding-left: 0; }
+    .slide--title h1 { color: #ffffff; font-size: clamp(2.2rem, 4vw, 3rem); }
+    .slide--title h2 { color: rgba(255, 255, 255, 0.8); }
+    .slide--title .slide-footer { border-top-color: rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.6); }
+
+    /* Section Break — diagonal stripes distinguish from title */
+    .slide--section {
+      justify-content: center;
+      background: var(--slide-accent);
+      color: #ffffff;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 40px,
+        rgba(255, 255, 255, 0.04) 40px,
+        rgba(255, 255, 255, 0.04) 80px
+      );
+    }
+
+    .slide--section .slide-header {
+      border-left-color: rgba(255, 255, 255, 0.5);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 16px;
+    }
+
+    .slide--section h1 { color: #ffffff; font-size: clamp(2rem, 3.5vw, 2.8rem); }
+    .slide--section h2 { color: rgba(255, 255, 255, 0.7); }
+    .slide--section .slide-footer { border-top-color: rgba(255, 255, 255, 0.15); color: rgba(255, 255, 255, 0.5); }
+
+    /* Split */
+    .slide--split .slide-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    /* Tables */
+    .slide table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+    .slide th { background: var(--slide-accent); color: #fff; padding: 8px 12px; text-align: left; font-weight: 600; }
+    .slide td { padding: 6px 12px; border-bottom: 1px solid var(--c-border); }
+    .slide tr:nth-child(even) td { background: var(--c-stripe); }
+
+    /* Code */
+    .slide pre { background: var(--slide-accent); color: #e2e8f0; padding: 1em; border-radius: 6px; font-family: var(--font-mono); font-size: 0.85rem; overflow: auto; }
+    .slide code { background: var(--c-code-bg); color: var(--slide-accent); padding: 0.1em 0.3em; border-radius: 3px; font-family: var(--font-mono); font-size: 0.9em; }
+    .slide pre code { background: none; color: inherit; padding: 0; }
+
+    /* Blockquotes */
+    .slide blockquote { border-left: 4px solid var(--slide-accent); padding-left: 1em; color: var(--slide-secondary); font-style: italic; margin: 1em 0; }
+
+    @media print {
+      @page { size: 1280px 720px; margin: 0; }
+      body { background: white; }
+      .deck-nav { display: none; }
+      .deck-slides { gap: 0; padding: 0; }
+      .deck-slide-number { display: none; }
+      .deck-slide-wrapper { scroll-margin-top: 0; }
+      .slide { box-shadow: none; border: none; page-break-after: always; break-after: page; background-image: none; }
+      .slide--title, .slide--section { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+
+    @media (max-width: 800px) {
+      .deck-nav { flex-wrap: wrap; padding: 8px 16px; gap: 8px; }
+      .deck-meta { display: none; }
+      .deck-slides { padding: 16px 8px 32px; gap: 16px; }
+      .slide { padding: 32px 40px 28px; }
+      .slide h1 { font-size: clamp(1.4rem, 5vw, 1.8rem); }
+      .slide-content { font-size: 1rem; }
+      .slide--split .slide-content { grid-template-columns: 1fr; gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="deck-nav">
+    <h1>Deck Title — Review Mode</h1>
+    <div class="deck-toc">
+      <a href="#slide-1">1</a>
+      <a href="#slide-2">2</a>
+      <a href="#slide-3">3</a>
+      <a href="#slide-4">4</a>
+    </div>
+    <div class="deck-meta">
+      <span>4 slides</span>
+      <span>Author</span>
+      <span>Date</span>
+    </div>
+  </nav>
+
+  <div class="deck-slides">
+
+    <div class="deck-slide-wrapper" id="slide-1">
+      <div class="deck-slide-number">Slide 1 of 4</div>
+      <div class="slide slide--title">
+        <div class="slide-header">
+          <h1>Presentation Title</h1>
+          <h2>Author Name — Institution — Date</h2>
+        </div>
+        <div class="slide-content"></div>
+        <div class="slide-footer">
+          <span class="meta">Author · Event · Date</span>
+          <span class="page">1 / 4</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="deck-slide-wrapper" id="slide-2">
+      <div class="deck-slide-number">Slide 2 of 4</div>
+      <div class="slide">
+        <div class="slide-header">
+          <h1>Content Slide</h1>
+          <h2>With bullet points and supporting detail</h2>
+        </div>
+        <div class="slide-content">
+          <ul>
+            <li>Key point one with supporting evidence</li>
+            <li>Key point two — lead with the conclusion</li>
+            <li>Key point three — concise and scannable</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <span class="meta">Author · Event · Date</span>
+          <span class="page">2 / 4</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="deck-slide-wrapper" id="slide-3">
+      <div class="deck-slide-number">Slide 3 of 4</div>
+      <div class="slide slide--section">
+        <div class="slide-header">
+          <h1>Section Title</h1>
+          <h2>Transition to next topic area</h2>
+        </div>
+        <div class="slide-content"></div>
+        <div class="slide-footer">
+          <span class="meta"></span>
+          <span class="page">3 / 4</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="deck-slide-wrapper" id="slide-4">
+      <div class="deck-slide-number">Slide 4 of 4</div>
+      <div class="slide slide--split">
+        <div class="slide-header">
+          <h1>Split Layout</h1>
+          <h2>Two-column content comparison</h2>
+        </div>
+        <div class="slide-content">
+          <div>
+            <h3>Left Column</h3>
+            <ul>
+              <li>First approach details</li>
+              <li>Supporting evidence</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Right Column</h3>
+            <ul>
+              <li>Second approach details</li>
+              <li>Comparative notes</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <span class="meta">Author · Event · Date</span>
+          <span class="page">4 / 4</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('keydown', function(e) {
+      var wrappers = document.querySelectorAll('.deck-slide-wrapper');
+      var current = -1;
+      for (var i = 0; i < wrappers.length; i++) {
+        var rect = wrappers[i].getBoundingClientRect();
+        if (rect.top >= -100 && rect.top <= window.innerHeight / 2) { current = i; break; }
+      }
+      if (current === -1) current = 0;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        var next = Math.min(current + 1, wrappers.length - 1);
+        wrappers[next].scrollIntoView({ behavior: 'smooth' });
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        var prev = Math.max(current - 1, 0);
+        wrappers[prev].scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  </script>
+</body>
+</html>

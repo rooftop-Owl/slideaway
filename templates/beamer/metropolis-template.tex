@@ -1,0 +1,95 @@
+\documentclass[aspectratio=169,12pt]{beamer}
+
+\usetheme{metropolis}
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\definecolor{myblue}{RGB}{26, 58, 92}
+\setbeamercolor{frametitle}{bg=myblue}
+\setbeamercolor{progress bar}{fg=myblue}
+
+\title{Presentation Title}
+\subtitle{Subtitle or Conference Name}
+\author{Author Name \\ \small{Institution}}
+\date{\today}
+\institute{Institution Name}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{Introduction}
+
+\begin{frame}{Motivation}
+  \begin{itemize}
+    \item Key problem or research question
+    \item Why it matters
+    \item What we contribute
+  \end{itemize}
+  \note{Speaker notes go here. Audience sees slides; presenter sees notes.}
+\end{frame}
+
+\section{Methods}
+
+\begin{frame}{Methodology}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \textbf{Approach}
+      \begin{itemize}
+        \item Step one
+        \item Step two
+        \item Step three
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \includegraphics[width=\textwidth]{figures/method-diagram.pdf}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{Results}
+
+\begin{frame}{Key Results}
+  \begin{table}
+    \caption{Summary of results}
+    \begin{tabular}{lcc}
+      \toprule
+      Method & Metric A & Metric B \\
+      \midrule
+      Baseline & 0.72 & 0.81 \\
+      Proposed & \textbf{0.89} & \textbf{0.94} \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+  \note{Highlight the key takeaway from this table.}
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Main finding one
+    \item Main finding two
+    \item Future work direction
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[standout]
+  Questions?
+\end{frame}
+
+\appendix
+
+\begin{frame}{Backup: Additional Details}
+\end{frame}
+
+\end{document}

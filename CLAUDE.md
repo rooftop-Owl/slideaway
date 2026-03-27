@@ -1,11 +1,15 @@
 # slideaway
 
-Presentation plugin for Claude Code — 7 engines, 30 styles, progressive disclosure architecture.
+Presentation plugin for Claude Code — 4-agent pipeline (slide-coach + Hephaestus + slide-reviewer + slide-qa), 7 engines, 30 styles, discovery-first progressive disclosure architecture.
 
 ## What This Plugin Provides
 
-- **3 skills**: slide-generation (progressive disclosure: 330-line core + 15 reference files), presentation-design-styles (30 styles, mood mapping, design foundations), presentation-visual-qa (render + inspect + delivery intelligence + automation scripts)
-- **2 agents**: slide-designer (aesthetic direction), slide-qa (visual quality assurance)
+- **3 skills**: slide-generation (Phase 0 discovery-first pipeline: audience analysis, narrative structure, Slide Brief, outline → Phase 2 content creation with 7 engines + progressive disclosure), presentation-design-styles (30 styles, mood mapping, design foundations), presentation-visual-qa (render + inspect + delivery intelligence + automation scripts)
+- **3 agents + Hephaestus orchestrator**:
+  - **slide-coach**: Phase 0 discovery/planning — audience analysis, narrative structure, Slide Brief, outline generation
+  - **Hephaestus** (external): Phase 2 content creation — 7 engines, progressive disclosure, style application
+  - **slide-reviewer**: Phase 3 content quality — 5-dimension review (narrative, visual, technical, audience, delivery)
+  - **slide-qa**: Phase 4 design quality — 4-dimension scoring, iterative fix loop (max 3 rounds)
 - **1 command**: /slides (with --preview, --refine, --style flags)
 - **8 tools**: slide_factory.py, validate_pptx.py (+ --duration, --quiet), thumbnail_grid.py, pdf_to_images.py, slides_to_pdf.py, html2pptx/, pptx_editor/, md2pptx/
 - **1 hook**: PostToolUse PPTX validation (early-exit for non-.pptx)

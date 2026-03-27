@@ -2,26 +2,52 @@
 triggers: [marp, marp slides, marp deck, slide deck, generate slides, generate presentation, pptx generation, editable pptx, editable powerpoint, make slides, create presentation, beamer talk, reveal slides, html slides, conference poster, academic poster]
 domains: [research, presentation, communication, output]
 name: slide-generation
-description: Use when generating slide presentations, posters, or visual output. Comprehensive armory with 7 engines — Marp, md2pptx, python-pptx, reveal.js, Beamer, HTML, RISE. Supersedes basic presentation skill.
-version: "2.0.0"
-success_criteria: ["engine selected appropriately", "content generated in target format", "output validated"]
+description: Use when generating slide presentations, posters, or visual output. Multi-agent pipeline with discovery-first Phase 0 (slide-coach), 7 engines, content review (slide-reviewer), and visual QA (slide-qa). Supersedes basic presentation skill.
+version: "2.2.0"
+success_criteria: ["slide brief approved before generation", "engine selected appropriately", "content generated in target format", "content review passed", "design review passed", "output validated"]
 ---
 
 # Slide Generation — Progressive Disclosure Armory
 
-7 engines. One skill. Pick the right tool, load the right reference, generate and validate before delivery.
+Multi-agent pipeline. 7 engines. Discovery-first. Every deck starts with a Slide Brief and ends with independent QA.
 
 ## Phase Flow Overview
 
-1. Select engine (Section A decision matrix)
-1.5. Optional style preview gate (`--preview`, Phase 0.5)
-2. Load required reference file(s)
-3. Generate output with engine-specific commands
-4. Validate structure/output integrity
-5. Deliver with validation notes
-5.5. Optional refinement loop (`--refine`, Phase 5.5)
+```
+Phase 0: Discovery (MANDATORY — slide-coach)
+  0a. Signal parsing (silent — infer from topic)
+  0b. Completeness check (Tier 1/2/3)
+  0c. Smart gap-fill (AskUserQuestion, max 3 questions)
+  0d. Slide Brief assembly (load slide-brief-schema.md)
+  0e. Outline generation + approval gate
+  HARD GATE: no Phase 1 until brief + outline approved
+
+Phase 1: Engine resolution (auto from brief — never shown to user)
+  1.5. Optional style preview gate (--preview)
+
+Phase 2: Content creation (Hephaestus + slide-generation skill)
+
+Phase 3: Content review (slide-reviewer → fix if REVISE)
+
+Phase 4: Design review (slide-qa → iterative loop, max 3 rounds)
+
+Phase 5: Delivery report
+```
+
+**Default human path**: Conversational Phase 0 → automated Phases 1–5.
+**Agent-to-agent path**: `--no-coach` with explicit brief → skip Phase 0 → Phases 1–5.
 
 ## Phase-Loading Rules
+
+### Phase 0 — Discovery (slide-coach)
+When the slide-coach agent is invoked for Phase 0, it MUST load:
+- `references/slide-brief-schema.md` — typed contract for the Slide Brief
+- `references/talk-types.md` — presentation type taxonomy for signal parsing
+- `references/timing-guidelines.md` — duration → slide count calibration
+- `../presentation-design-styles/references/design-foundations.md` — typography, color theory, layout composition
+- `presentation-design-styles` skill — ALWAYS loaded for style selection (30 presets, mood→preset mapping, anti-slop rules)
+
+### Phase 1 — Engine Resolution
 When generating with a specific engine, you MUST read the corresponding reference file:
 - Marp output → read `references/engine-marp.md`
 - md2pptx output → read `references/engine-md2pptx.md`
@@ -30,16 +56,107 @@ When generating with a specific engine, you MUST read the corresponding referenc
 - Beamer/LaTeX output → read `references/engine-beamer.md`
 - HTML/RISE output → read `references/engine-html.md`
 - Poster output → read `references/poster-design.md`
-- `--preview` enabled → run Phase 0.5 and read mood→preset mapping from `presentation-design-styles` skill before full generation
+- `--preview` enabled → run Phase 1.5 and read mood→preset mapping from `presentation-design-styles` skill before full generation
+
+### Phase 2 — Content Creation
 - For ALL outputs → read `references/design-principles.md` (presentation intelligence)
-- Before delivery → read `references/validation-patterns.md`
-- `--refine` enabled → run Phase 5.5 and apply visual QA references (`presentation-visual-qa` + design-principles J.11) with delegated `slide-qa` inspection
 - Academic/scientific talk type specified (conference/seminar/defense/grant/journal-club) → read `references/talk-types.md`
 - User specifies duration OR asks about timing/practice → read `references/timing-guidelines.md`
 - Creating data-heavy slides with charts, plots, or figures → read `references/data-visualization.md`
 - Need design theory (why certain typography/color/layout choices) → read `../presentation-design-styles/references/design-foundations.md`
+
+### Phase 3 — Content Review (slide-reviewer)
+- `references/design-principles.md` Section J — presentation intelligence (J.1 purpose, J.2 audience, J.3 narrative, J.4 volume)
+- `../presentation-visual-qa/references/delivery-intelligence.md` — timing, pacing, delivery context
+- `references/talk-types.md` — talk type taxonomy for structure matching
+
+### Phase 4 — Design Review (slide-qa)
+- `../presentation-visual-qa/references/visual-qa-automation.md` — rendering paths, PIL automation scripts, issue log, stopping criteria
+- `../presentation-visual-qa/references/delivery-intelligence.md` — slide design for delivery support
+- Before delivery → read `references/validation-patterns.md`
+
+### Legacy Rules (still apply)
 - Evaluating whether slides support delivery (opening/closing/transitions/Q&A) → delegate to `slide-qa` agent with `../presentation-visual-qa/references/delivery-intelligence.md`
 - Reviewing rendered slides OR using pdf_to_images.py → load `../presentation-visual-qa/references/visual-qa-automation.md`; NEVER read PDF files directly
+
+---
+
+## Phase 0: Discovery (MANDATORY)
+
+> **HARD GATE**: Phase 1 (engine resolution) CANNOT start until the Slide Brief + outline are approved. No exceptions. Bad decks come from skipped planning, not bad engines.
+
+Phase 0 is owned by the **slide-coach** agent. The orchestrating agent MUST delegate to slide-coach before any generation begins.
+
+### Delegation Pattern (Phase 0)
+
+```
+task(
+  subagent_type="hephaestus",
+  description="Phase 0: slide discovery and brief",
+  prompt="""
+    You are the slide-coach. Load the slide-generation skill and the
+    presentation-design-styles skill. Run Phase 0 discovery for:
+
+    Topic: "{user_topic}"
+    Flags: {flags}
+
+    Follow the 6-step Phase 0 pipeline (0a–0f) from slide-coach.md.
+    Output: approved Slide Brief + slide-by-slide outline.
+    HARD GATE: do NOT proceed to generation.
+  """,
+  run_in_background=false
+)
+```
+
+### Phase 0 Steps (Summary — full detail in slide-coach.md)
+
+| Step | Name | Action |
+|------|------|--------|
+| 0a | Signal Parsing | Silent inference from topic string — audience, type, duration, formality, domain, narrative structure |
+| 0b | Completeness Check | Classify as Tier 1 (rich), Tier 2 (moderate), or Tier 3 (sparse) |
+| 0c | Smart Gap-Fill | Ask ≤3 natural questions via AskUserQuestion. Bias toward Tier 1 — infer when possible. |
+| 0d | Brief Assembly | Fill all required fields from `references/slide-brief-schema.md`. Run anti-slop check. |
+| 0e | Outline Generation | Slide-by-slide outline following the selected narrative structure |
+| 0f | Approval Gate | Present brief + outline. Wait for explicit "go" before Phase 1. |
+
+### Beamer Template Selection (Phase 0d)
+
+When the brief's presentation type maps to Beamer output, select the template during brief assembly:
+
+| Talk Type | Beamer Template | Rationale |
+|-----------|----------------|-----------|
+| `conference` | `templates/beamer/conference/` | Conference-optimized: section frames, bibliography, affiliation |
+| `seminar` | `templates/beamer/seminar/` | Seminar-optimized: longer form, discussion prompts |
+| `defense` | `templates/beamer/defense/` | Defense-optimized: committee-facing, appendix-ready |
+| All other academic | `templates/beamer/metropolis/` | Clean default: metropolis theme, minimal chrome |
+
+Record the selected template in the Slide Brief's `engine_hints.beamer_template` field so Phase 1 uses it directly.
+
+### Duration Capture (Phase 0)
+
+Duration MUST be captured during Phase 0 (Step 0a inference or Step 0c question) and recorded in the Slide Brief's `timing.duration_minutes` field. This value flows downstream to:
+- **Phase 2**: slide count calibration (via timing-guidelines.md)
+- **Phase 4**: `validate_pptx.py --duration {duration}` for structural validation
+
+If the user does not specify duration and it cannot be inferred, default to 15 minutes and note the assumption in the brief.
+
+---
+
+## --no-coach Mode (Backward Compatibility)
+
+When `--no-coach` is present, skip Phase 0 entirely. This is the legacy v2.0/v2.1 path for programmatic or agent-to-agent use.
+
+**Behavior**:
+1. Use provided flags for engine (`--engine`), style (`--style`), duration (`--slides`), format (`--format`)
+2. Skip slide-coach invocation — no discovery, no brief, no approval gate
+3. Proceed directly to Phase 1 (engine resolution) using the flag-based decision matrix
+4. Phases 3–4 (content review, design review) still run unless explicitly skipped
+
+**When to use**: Automated pipelines, agent-to-agent delegation with pre-computed parameters, or users who want direct engine control without the conversational flow.
+
+**Philosophy**: Flags are for agents. Conversation is for humans. The default human path is always Phase 0.
+
+---
 
 ## Minimum Required Context
 
@@ -273,7 +390,7 @@ Default: no theme applied = base styles from `slide-template.html`. Themes overr
 
 ---
 
-## Phase 0.5: Style Preview (--preview)
+## Phase 1.5: Style Preview (--preview)
 
 Run this phase only when `--preview` is explicitly specified. If no `--preview` flag is present, skip this phase entirely and keep default behavior unchanged.
 
@@ -293,7 +410,102 @@ Notes:
 - This is an opt-in exploration gate, not the default path.
 - Do not proceed to full generation style-lock until a preset is selected (or user explicitly opts out after preview).
 
-## Phase 5.5: Refinement Loop (--refine)
+---
+
+## Phase 3: Content Review (slide-reviewer)
+
+After generation (Phase 2), delegate to the **slide-reviewer** agent for content quality verification. This is a distinct step from visual QA — it checks messaging, narrative, and audience calibration against the Slide Brief.
+
+### Delegation Pattern (Phase 3)
+
+```
+task(
+  subagent_type="hephaestus",
+  description="Phase 3: content review against brief",
+  prompt="""
+    You are the slide-reviewer. Load the slide-generation skill.
+    
+    Review the generated deck at: {output_path}
+    Against the Slide Brief at: {brief_path}
+    
+    Evaluate all 5 dimensions: message fidelity, narrative coherence,
+    completeness, audience calibration, ask alignment.
+    
+    Output: CONTENT REVIEW verdict (PASS or REVISE with per-slide notes).
+    If REVISE: provide specific revision instructions per slide.
+  """,
+  run_in_background=false
+)
+```
+
+### Verdict Handling
+- **PASS** → proceed to Phase 4 (design review)
+- **REVISE** → apply revision instructions, regenerate affected slides, re-run Phase 3 (max 2 iterations)
+
+---
+
+## Phase 4: Design Review (slide-qa)
+
+After content review passes, delegate to the **slide-qa** agent for visual quality assurance. This is an iterative loop with convergence guardrails.
+
+### Explicit validate_pptx.py Call (MANDATORY)
+
+In Phase 4, **ALWAYS** run `validate_pptx.py` explicitly before visual inspection. Do NOT rely solely on the PostToolUse hook, which misses Bash-generated PPTX files:
+
+```bash
+python3 modules/slides/tools/validate_pptx.py output.pptx --duration {duration_from_brief}
+```
+
+Replace `{duration_from_brief}` with the target presentation duration from the Slide Brief's `timing.duration_minutes` field (e.g., `15` for a 15-minute talk). If no duration is specified in the brief, omit the `--duration` flag.
+
+### Delegation Pattern (Phase 4)
+
+```
+task(
+  subagent_type="hephaestus",
+  description="Phase 4: visual QA inspection",
+  prompt="""
+    You are the slide-qa agent. Load the presentation-visual-qa skill.
+    
+    1. Run structural pre-check:
+       python3 modules/slides/tools/validate_pptx.py {output_path} --duration {duration}
+    
+    2. Render all slides to images (Path A or B per skill).
+    
+    3. Run the full visual inspection checklist.
+    
+    4. Score across 4 dimensions: Readability, Aesthetics, Conciseness, Fidelity.
+    
+    5. Issue verdict: PASS (all ≥4), ITERATE (fixable), or HALT (needs content changes).
+    
+    If ITERATE: fix visual issues and re-inspect (max 3 rounds total).
+    If HALT: report trade-offs and recommend next steps.
+    
+    Slide Brief at: {brief_path}
+    Output deck at: {output_path}
+  """,
+  run_in_background=false
+)
+```
+
+### Verdict Handling
+- **PASS** → proceed to Phase 5 (delivery)
+- **ITERATE** → slide-qa fixes visual issues and re-inspects (up to 3 rounds, with convergence rule)
+- **HALT** → report trade-offs to user. May route back to slide-reviewer for content changes or regenerate with different engine.
+
+---
+
+## Phase 5: Delivery & Refinement
+
+### Standard Delivery
+After Phase 4 PASS, deliver the deck with:
+1. Output file path
+2. Slide count and duration estimate
+3. Phase 3 content review summary
+4. Phase 4 design review summary (final scores)
+5. Any caveats or known limitations
+
+### Refinement Loop (--refine)
 
 Run this phase only when `--refine` is explicitly specified. If no `--refine` flag is present, skip refinement entirely.
 
@@ -313,6 +525,7 @@ Verification separation (required):
 
 ## Reference Files (Load by Phase)
 
+- `references/slide-brief-schema.md` — Typed contract for Slide Brief (Phase 0)
 - `references/engine-marp.md` — Section B (Marp CLI)
 - `references/engine-md2pptx.md` — Section C (md2pptx)
 - `references/engine-pptx.md` — Section D (python-pptx + SlideFactory)

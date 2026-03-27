@@ -1,10 +1,10 @@
 # 🎯 Slideaway
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.0.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-2.2.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/engines-7-green?style=for-the-badge" alt="7 Engines">
   <img src="https://img.shields.io/badge/styles-30-purple?style=for-the-badge" alt="30 Styles">
-  <img src="https://img.shields.io/badge/skills-3-orange?style=for-the-badge" alt="3 Skills">
+  <img src="https://img.shields.io/badge/agents-3-red?style=for-the-badge" alt="3 Agents">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/rooftop-Owl/slideaway?style=for-the-badge&color=green" alt="License"></a>
 </p>
 
@@ -21,7 +21,7 @@
 /plugin install slideaway@slideaway-marketplace
 ```
 
-After installing, the `/slides` command, 3 skills, and 2 agents are immediately available in your Claude Code session. No configuration required — engines degrade gracefully if optional dependencies are missing.
+After installing, the `/slides` command, 3 skills, and 3 agents are immediately available in your Claude Code session. No configuration required — engines degrade gracefully if optional dependencies are missing.
 
 
 ---
@@ -48,10 +48,11 @@ Most presentation tools generate generic AI output. Slideaway enforces quality t
 
 ### Agents
 
-| Agent | Role |
-|-------|------|
-| **slide-designer** | Aesthetic direction — style selection, audience awareness, anti-slop enforcement |
-| **slide-qa** | Visual quality assurance — render, inspect, verdict |
+| Agent | Role | Phase |
+|-------|------|-------|
+| **slide-coach** | Discovery & planning — audience analysis, narrative arc, brief, outline | Phase 0 |
+| **slide-reviewer** | Content quality — 5-dimension review (accuracy, narrative, density, audience, citations) | Phase 3 |
+| **slide-qa** | Design quality — 4-dimension visual QA (layout, typography, color, contrast), 3 rounds max | Phase 4 |
 
 ### Commands
 
@@ -142,23 +143,34 @@ slides/
 
 ## Architecture
 
+Slideaway v2.2 uses a **multi-agent pipeline** with 6 phases. Three specialized agents handle discovery, content review, and design QA — separating concerns so no single agent is both producer and judge.
+
 ```
 /slides "topic"
     │
-    ├─► Engine Selection (core SKILL.md — 318 lines)
+    ├─► Phase 0: Discovery (slide-coach)
+    │       Audience analysis → narrative arc → brief → outline
+    │       Conversational: asks clarifying questions before proceeding
+    │
+    ├─► Phase 1: Engine Resolution (auto)
     │       Marp │ md2pptx │ python-pptx │ reveal.js │ Beamer │ HTML │ RISE
+    │       Resolved from --engine flag, --format, or audience context
     │
-    ├─► Phase Loading (on-demand reference files)
-    │       references/engine-{name}.md loaded per selected engine
-    │
-    ├─► Style Application (30 presets × 6 categories)
-    │       Optional: --preview generates 3 visual variants
-    │
-    ├─► Generation
+    ├─► Phase 2: Content Creation (7 engines)
+    │       Style application (30 presets × 6 categories)
+    │       Phase-loaded reference files per engine
     │       PostToolUse hook auto-validates .pptx output
     │
-    └─► Optional: --refine loop (max 2 iterations)
-            slide-qa agent inspects → fixes → re-inspects
+    ├─► Phase 3: Content Review (slide-reviewer)
+    │       5 dimensions: accuracy, narrative flow, information density,
+    │       audience alignment, citation completeness
+    │
+    ├─► Phase 4: Design Review (slide-qa)
+    │       4 dimensions: layout, typography, color harmony, contrast
+    │       Up to 3 review rounds (converges or accepts)
+    │
+    └─► Phase 5: Delivery
+            Final output + delivery notes (timing, speaker notes, handouts)
 ```
 
 ---
@@ -241,10 +253,25 @@ All dependencies are optional — engines degrade gracefully with install guidan
 
 ## Philosophy
 
+- **Flags are for agents. Conversation is for humans.** — The `/slides` command uses flags for machine-parseable options; everything else is discovered through dialogue with slide-coach
 - **Workflow over Capability** — Models improve; workflow skills get better with them
 - **Progressive Disclosure** — 330-line core loads 15 reference files on demand, not everything upfront
-- **Producer ≠ Verifier** — slide-designer generates, slide-qa inspects independently
+- **Producer ≠ Verifier** — slide-coach discovers, engines generate, slide-reviewer and slide-qa inspect independently
 - **Anti-AI-Slop** — Banned fonts (Inter, Roboto, Arial), banned colors (#6366f1), distinctive presets enforce visual identity
+---
+
+## Inspired By
+
+Slideaway's multi-agent architecture draws from recent advances in automated presentation generation:
+
+| System | Key Insight | Reference |
+|--------|-------------|-----------|
+| **PaperBanana** | 5-agent pipeline (analyst → planner → writer → designer → reviewer) proves multi-agent outperforms single-agent for slide generation | Zheng et al. (2025), Google Research / PKU |
+| **SlideBot** | Cognitive Load Theory (CLT) as a design constraint — measuring intrinsic, extraneous, and germane load per slide | Sarkar et al. (EAAI 2026) |
+| **SlideGen** | Collaborative multimodal generation — LLM + diffusion model + layout optimizer working in concert | Wu et al. (2025) |
+| **PPTAgent** | Generation + evaluation as dual concerns — separate agents for creating vs. judging slide quality | Li et al. (2025) |
+
+Slideaway adapts these patterns for the Claude Code plugin ecosystem: agents are skills + system prompts (not fine-tuned models), the pipeline is flag-driven (not API-driven), and quality gates are iterative (up to 3 rounds, not single-pass).
 
 ---
 

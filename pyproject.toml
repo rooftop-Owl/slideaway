@@ -1,6 +1,6 @@
 [project]
 name = "slideaway"
-version = "2.1.0"
+version = "2.2.0"
 description = "Presentation armory — 7 engines, 30 styles, progressive disclosure. Claude Code plugin for slides, posters, and visual output."
 readme = "README.md"
 license = {text = "MIT"}

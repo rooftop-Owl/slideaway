@@ -12,6 +12,8 @@ Generate presentations, slide decks, and posters via a 7-engine armory. Default 
 
 Delegates to **Hephaestus** with subdirectory skill `slide-generation` via `load_skills=["slide-generation"]`.
 
+> **Default human path**: Just type `/slides "your topic"`. The conversational Phase 0 discovery handles everything — audience, style, narrative, outline — before any generation happens. Flags below are for programmatic or power-user use.
+
 ## Usage
 
 ```
@@ -22,6 +24,7 @@ Delegates to **Hephaestus** with subdirectory skill `slide-generation` via `load
 /slides "topic" --engine reveal --interactive
 /slides "topic" --engine beamer --academic
 /slides "topic" --from paper-draft.md --format pptx
+/slides "topic" --no-coach --engine pptx --style executive-suite --slides 12
 ```
 
 ## Arguments
@@ -42,6 +45,18 @@ Delegates to **Hephaestus** with subdirectory skill `slide-generation` via `load
 | `--preview` | false | Generate 2-3 style previews before full deck (opt-in). Shows visual options for style selection. |
 | `--refine` | false | After generation, auto-inspect and fix issues (opt-in, max 2 iterations). Uses slide-qa agent. |
 | `--style <name>` | — | Use a specific style preset by name (e.g., --style executive-suite). Skips style selection. |
+| `--no-coach` | false | Skip Phase 0 discovery. Use provided flags directly for engine/style/duration. For agent-to-agent or power-user use. |
+
+## Agents Involved
+
+Four agents collaborate across the pipeline:
+
+| Agent | Phase | Role |
+|-------|-------|------|
+| **slide-coach** | Phase 0 — Discovery | Signal parsing, audience calibration, brief assembly, outline, approval gate |
+| **Hephaestus** | Phase 1–2 — Engine & Content | Engine resolution, content generation, engine conversion |
+| **slide-reviewer** | Phase 3 — Content Review | Narrative coherence, slide-level feedback, content quality |
+| **slide-qa** | Phase 4 — Design Review | Visual QA, render inspection, PASS/FAIL verdicts (iterative, max 2 rounds) |
 
 ## Theme Usage
 
@@ -112,51 +127,63 @@ Routing rule: if styling quality is required (16:9, explicit fonts, title/subtit
 ```
 User request
     │
-    ├─[1]─► Parse arguments, resolve engine (see resolution logic above)
+    ├─[Phase 0]─► Discovery (slide-coach agent)
+    │              Signal parsing → completeness check → smart gap-fill →
+    │              brief assembly → outline generation → APPROVAL GATE
+    │              ⚠ Generation CANNOT start until brief + outline are approved.
+    │              (Skipped with --no-coach: flags used directly, no interactive discovery)
     │
-    ├─[2]─► Check engine dependencies available
-    │       If missing: report issue, suggest install command,
-    │       offer fallback engine (e.g., md2pptx for template-first markdown,
-    │       or Marp static if editable path unavailable)
+    ├─[Phase 1]─► Engine Resolution
+    │              Parse arguments, resolve engine (see resolution logic above).
+    │              Check engine dependencies available.
+    │              If missing: report issue, suggest install command,
+    │              offer fallback engine (e.g., md2pptx for template-first markdown,
+    │              or Marp static if editable path unavailable)
     │
-    ├─[3]─► Generate presentation structure (outline)
-    │       Agent creates slide-by-slide outline:
-    │       - Slide 1: Title
-    │       - Slide 2: Motivation/Problem
-    │       - Slides 3-N: Content
-    │       - Slide N+1: Summary/Conclusion
-    │       - Speaker notes per slide
+    ├─[Phase 2]─► Content Creation (Hephaestus)
+    │              Generate presentation structure (outline → source content).
+    │              Engine-specific format:
+    │              - Marp/md2pptx: Marp-flavored or standard Markdown
+    │              - python-pptx: Python script with SlideFactory
+    │              - reveal.js: Markdown with YAML frontmatter
+    │              - Beamer: LaTeX document
+    │              - HTML: Individual HTML files
+    │              - RISE: Tagged Jupyter notebook
+    │              Convert via engine. Check exit code.
+    │              If non-zero: capture stderr, report error.
     │
-    ├─[4]─► Generate source content
-    │       Engine-specific format:
-    │       - Marp/md2pptx: Marp-flavored or standard Markdown
-    │       - python-pptx: Python script with SlideFactory
-    │       - reveal.js: Markdown with YAML frontmatter
-    │       - Beamer: LaTeX document
-    │       - HTML: Individual HTML files
-    │       - RISE: Tagged Jupyter notebook
+    ├─[Phase 3]─► Content Review (slide-reviewer agent)
+    │              Narrative coherence check. Slide-level feedback.
+    │              Verify brief fidelity (audience, structure, slide count).
+    │              Flag content issues for revision before design QA.
     │
-    ├─[4.5]► Convert via engine
-    │        Run engine command. Check exit code.
-    │        If non-zero: capture stderr, report:
-    │        "Engine failed: {stderr}. Check: dependencies installed?
-    │         Source syntax correct? Output path writable?"
+    ├─[Phase 4]─► Design Review (slide-qa agent, iterative)
+    │              Validate output:
+    │              - For PPTX: mandatory structural inspection
+    │                (`python3 modules/slides/tools/validate_pptx.py output.pptx`)
+    │              - For HTML: optionally screenshot via chrome-devtools
+    │              - For PDF: check page count with pdfinfo
+    │              Visual QA: render, inspect, PASS/FAIL verdict.
+    │              If FAIL: fix issues and re-inspect (max 2 iterations).
     │
-    ├─[5]─► Validate output
-    │       - File exists and is non-empty
-    │       - For PPTX: mandatory structural inspection
-    │         (`python3 modules/slides/tools/validate_pptx.py output.pptx`)
-    │       - For HTML: optionally screenshot via chrome-devtools
-    │       - For PDF: check page count with pdfinfo
-    │
-    └─[6]─► Report
-            "✓ Generated 10-slide presentation
-             Engine: python-pptx + SlideFactory (editable PPTX)
-             Output: ./slides/climate-risk-talk.pptx
-             Editable: ✅ Yes — open in PowerPoint to edit
-             Validation: structural inspection passed
-             Source: ./slides/build_slides.py (edit and re-run)"
+    └─[Phase 5]─► Delivery
+                   "✓ Generated 10-slide presentation
+                    Engine: python-pptx + SlideFactory (editable PPTX)
+                    Output: ./slides/climate-risk-talk.pptx
+                    Editable: ✅ Yes — open in PowerPoint to edit
+                    Validation: structural inspection passed
+                    Source: ./slides/build_slides.py (edit and re-run)"
 ```
+
+### --no-coach Behavior
+
+When `--no-coach` is passed, Phase 0 is skipped entirely. The provided flags (`--engine`, `--style`, `--slides`, `--academic`, etc.) are used directly without interactive discovery. This is intended for:
+
+- **Agent-to-agent delegation**: Another agent has already gathered requirements and passes a complete specification.
+- **Power users**: Users who know exactly what they want and prefer to specify everything via flags.
+- **Automated pipelines**: CI/CD or batch generation where no human is in the loop.
+
+Without `--no-coach`, the default path is conversational: the slide-coach asks natural questions, assembles a brief, shows an outline, and waits for approval before any generation begins.
 
 ## Skill Required
 

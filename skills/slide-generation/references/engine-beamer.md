@@ -116,6 +116,58 @@ pdflatex slides.tex && bibtex slides && pdflatex slides.tex && pdflatex slides.t
 | `xelatex` for Unicode | Handles non-ASCII | Encoding errors with pdflatex |
 | `tectonic` for conda envs | Auto-downloads missing packages | `\tikzscope@linewidth` undefined |
 
+### Beamer Anti-Patterns (HARD FAIL — never generate these)
+
+These patterns cause PGF scope corruption when TikZ diagrams are present in any frame. The generator MUST NOT produce them.
+
+| Anti-Pattern | Why It Breaks | Safe Alternative |
+|-------------|--------------|-----------------|
+| `\setbeamertemplate{frametitle}{...custom...}` | Corrupts `\tikzscope@linewidth` for TikZ in same frame | `\setbeamercolor{frametitle}{bg=Color, fg=white}` (color only) |
+| `\usetheme{default}` + custom templates | Loses PGF-safe template internals from real themes | Always use a named theme: `metropolis`, `Madrid`, `Boadilla` |
+| Custom `beamercolorbox` footline | PGF scope leak across frames | `\setbeamertemplate{frame numbering}[fraction]` or theme's built-in footline |
+| `\setbeamercolor{background canvas}{bg=...}` | Different PGF scope management than theme default | Let the theme handle background (empty bg) |
+| `\setbeamercolor{normal text}{bg=...}` | Same scope issue as background canvas | Only set `fg`, never `bg` on normal text |
+
+**The safe pattern** (verified on tectonic + pdflatex + xelatex):
+
+```latex
+% SAFE — use theme + color overrides ONLY
+\usetheme{metropolis}
+\definecolor{ResearchBlue}{HTML}{2C3E6B}
+\definecolor{AccentRed}{HTML}{E74C3C}
+\setbeamercolor{frametitle}{bg=ResearchBlue, fg=white}
+\setbeamercolor{progress bar}{fg=ResearchBlue}
+\setbeamercolor{alerted text}{fg=AccentRed}
+% DO NOT override: frametitle template, footline template, background canvas bg
+```
+
+**The dangerous pattern** (generates PGF scope corruption with TikZ):
+
+```latex
+% DANGEROUS — do NOT generate this
+\usetheme{default}  % <-- loses all PGF-safe internals
+\setbeamertemplate{frametitle}{%  % <-- corrupts TikZ scope
+  \vspace{0.4em}%
+  \insertframetitle\par
+}  
+\setbeamertemplate{footline}{%  % <-- PGF scope leak
+  \hbox{\begin{beamercolorbox}[wd=0.7\paperwidth]{footline}...
+}  
+```
+
+### Compilation Gate (MANDATORY after generation)
+
+> After generating a `.tex` file, ALWAYS compile it before reporting success.
+> If compilation fails, fix the preamble (usually by removing custom template overrides) and retry.
+> Max 2 fix attempts. If still broken, report the compilation error to the user.
+>
+> ```bash
+> tectonic slides.tex  # preferred
+> # fallback: pdflatex -halt-on-error -interaction=nonstopmode slides.tex
+> ```
+>
+> **The `--refine` flag is useless if the file doesn't compile.** Compilation check MUST precede visual QA.
+
 ### Useful Environments
 
 ```latex

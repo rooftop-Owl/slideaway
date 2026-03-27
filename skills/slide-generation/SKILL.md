@@ -448,6 +448,26 @@ task(
 
 After content review passes, delegate to the **slide-qa** agent for visual quality assurance. This is an iterative loop with convergence guardrails.
 
+### Compilation Gate (MANDATORY before visual QA)
+
+For engines that produce compilable source files (Beamer `.tex`, Marp `.md`), **compile the output and check the exit code BEFORE proceeding to visual inspection**. If compilation fails:
+
+1. Check for Beamer anti-patterns (see `references/engine-beamer.md` → Anti-Patterns section)
+2. Fix the preamble (usually by removing custom `\setbeamertemplate` overrides)
+3. Recompile (max 2 fix attempts)
+4. If still broken, report the compilation error to the user — do NOT claim validation passed
+
+```bash
+# Beamer: compile and check exit code
+tectonic slides.tex  # preferred (auto-downloads packages)
+# fallback: pdflatex -halt-on-error -interaction=nonstopmode slides.tex
+
+# Marp: compile and check exit code
+npx @marp-team/marp-cli slides.md --html --allow-local-files
+```
+
+> **The `--refine` flag and visual QA are useless if the source doesn't compile.** Compilation gate MUST precede visual inspection.
+
 ### Explicit validate_pptx.py Call (MANDATORY)
 
 In Phase 4, **ALWAYS** run `validate_pptx.py` explicitly before visual inspection. Do NOT rely solely on the PostToolUse hook, which misses Bash-generated PPTX files:

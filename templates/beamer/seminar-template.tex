@@ -1,0 +1,310 @@
+% Slideaway — Seminar/Invited Talk Template (45–60 min)
+% Theme: Madrid/dolphin — softer blue tone for longer departmental talks
+% Structural scaffolding only. Style/color theory → design-foundations.md
+% Engine workflow → engine-beamer.md
+
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% Section dividers — pause between major segments
+\AtBeginSection[]{
+  \begin{frame}
+    \vfill
+    \centering
+    \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+      \usebeamerfont{title}\insertsectionhead\par
+    \end{beamercolorbox}
+    \vfill
+  \end{frame}
+}
+
+% ── Packages ──────────────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage[backend=biber,style=authoryear]{biblatex}
+% \addbibresource{references.bib}
+
+% Code listing defaults
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+}
+
+% ── Title Metadata ────────────────────────────────────────────────────────
+\title[Short Title]{Full Seminar Title}
+\subtitle{Department Seminar Series — Spring 2026}
+\author[A.~Author]{Author Name}
+\institute{Department of X \\ University of Y}
+\date{\today}
+
+% ══════════════════════════════════════════════════════════════════════════
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+% ── Motivation and Background (5–7 slides, ~10 min) ──────────────────────
+\section{Motivation and Background}
+
+\begin{frame}{The Big Picture}
+  \begin{itemize}
+    \item Broad context — why this field matters
+    \item The specific problem we address
+    \item State of the art and its limitations
+  \end{itemize}
+  \note{For seminars, assume mixed expertise. Spend more time on context than in a conference talk.}
+\end{frame}
+
+\begin{frame}{Literature Context}
+  \begin{itemize}
+    \item Foundational work: [Author et al., Year]
+    \item Recent advances: [Author et al., Year]
+    \item Key gap this work fills
+  \end{itemize}
+  \note{Cite 5–8 key papers. Show you know the field deeply.}
+\end{frame}
+
+\begin{frame}{Research Questions}
+  \begin{enumerate}
+    \item Primary question / hypothesis
+    \item Secondary question (if applicable)
+    \item Expected contribution
+  \end{enumerate}
+  \note{Make the questions crisp and testable. Audience should remember these.}
+\end{frame}
+
+% ── Methods (5–7 slides, ~12 min) ────────────────────────────────────────
+\section{Methods}
+
+\begin{frame}{Study Design Rationale}
+  \begin{itemize}
+    \item Why this approach over alternatives
+    \item Design trade-offs and their justification
+    \item Connection to research questions
+  \end{itemize}
+  \note{Seminars allow deeper methods discussion. Explain your reasoning, not just the procedure.}
+\end{frame}
+
+\begin{frame}{Data and Participants}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Data Sources}
+      \begin{itemize}
+        \item Source 1: description, coverage
+        \item Source 2: description, coverage
+        \item Quality control procedures
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \framebox[\textwidth]{\parbox{0.9\textwidth}{\centering\vspace{2cm}Data Overview Figure\vspace{2cm}}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Analysis Procedures}
+  \begin{enumerate}
+    \item Pre-processing pipeline
+    \item Core analysis method
+    \item Validation strategy
+  \end{enumerate}
+  \note{Walk through the pipeline step by step. Seminars reward methodological depth.}
+\end{frame}
+
+\begin{frame}{Analysis Plan}
+  \begin{table}
+    \caption{Analysis components mapped to research questions}
+    \begin{tabular}{lll}
+      \toprule
+      Research Question & Analysis Method & Validation \\
+      \midrule
+      RQ1 & Method A & Cross-validation \\
+      RQ2 & Method B & Sensitivity test \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+% ── Results: Aim 1 (4–5 slides, ~8 min) ──────────────────────────────────
+\section{Results: Aim 1}
+
+\begin{frame}{Aim 1 — Overview}
+  \begin{itemize}
+    \item What we tested / explored
+    \item Summary of findings
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Aim 1 — Main Result}
+  \begin{center}
+    \framebox[0.8\textwidth]{\parbox{0.7\textwidth}{\centering\vspace{3cm}Aim 1 Key Figure\vspace{3cm}}}
+  \end{center}
+  \note{Let the figure speak. One slide, one message.}
+\end{frame}
+
+\begin{frame}{Aim 1 — Supporting Details}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \framebox[\textwidth]{\parbox{0.9\textwidth}{\centering\vspace{2cm}Supporting Fig A\vspace{2cm}}}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{itemize}
+        \item Interpretation point 1
+        \item Interpretation point 2
+        \item Connection to hypothesis
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ── Results: Aim 2 (4–5 slides, ~8 min) ──────────────────────────────────
+\section{Results: Aim 2}
+
+\begin{frame}{Aim 2 — Overview}
+  \begin{itemize}
+    \item What we tested / explored
+    \item Summary of findings
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Aim 2 — Main Result}
+  \begin{center}
+    \framebox[0.8\textwidth]{\parbox{0.7\textwidth}{\centering\vspace{3cm}Aim 2 Key Figure\vspace{3cm}}}
+  \end{center}
+\end{frame}
+
+% ── Results: Aim 3 (4–5 slides, ~8 min) ──────────────────────────────────
+\section{Results: Aim 3}
+
+\begin{frame}{Aim 3 — Overview}
+  \begin{itemize}
+    \item What we tested / explored
+    \item Summary of findings
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Aim 3 — Main Result}
+  \begin{center}
+    \framebox[0.8\textwidth]{\parbox{0.7\textwidth}{\centering\vspace{3cm}Aim 3 Key Figure\vspace{3cm}}}
+  \end{center}
+\end{frame}
+
+% ── Discussion (3 slides, ~7 min) ─────────────────────────────────────────
+\section{Discussion}
+
+\begin{frame}{Synthesis}
+  \begin{itemize}
+    \item How the three aims connect
+    \item What the combined results tell us
+    \item Comparison with prior work
+  \end{itemize}
+  \note{This is the intellectual core of the seminar. Connect the dots for the audience.}
+\end{frame}
+
+\begin{frame}{Implications}
+  \begin{itemize}
+    \item Theoretical implications
+    \item Practical applications
+    \item Policy relevance (if applicable)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Limitations and Caveats}
+  \begin{itemize}
+    \item Known limitation 1 and its impact
+    \item Known limitation 2 and how we mitigate
+    \item What this work does NOT claim
+  \end{itemize}
+  \note{Proactively addressing limitations builds credibility.}
+\end{frame}
+
+% ── Future Directions (1–2 slides) ────────────────────────────────────────
+\section{Future Directions}
+
+\begin{frame}{Next Steps}
+  \begin{enumerate}
+    \item Short-term: immediate follow-up study
+    \item Medium-term: extending the framework
+    \item Long-term: broader applications
+  \end{enumerate}
+  \note{Show you have a research trajectory. Good for seminar audiences evaluating your program.}
+\end{frame}
+
+% ── Conclusion ────────────────────────────────────────────────────────────
+\section{Conclusion}
+
+\begin{frame}{Summary}
+  \begin{enumerate}
+    \item Key finding 1 (from Aim 1)
+    \item Key finding 2 (from Aim 2)
+    \item Key finding 3 (from Aim 3)
+  \end{enumerate}
+  \vfill
+  \small
+  Code: \url{https://github.com/your/repo} \\
+  Preprint: \url{https://arxiv.org/abs/xxxx.xxxxx}
+\end{frame}
+
+\begin{frame}{Acknowledgments}
+  \small
+  This work was supported by [Funding Agency, Grant \#].
+
+  We thank [collaborators] for contributions and [reviewers] for feedback.
+
+  % \printbibliography
+\end{frame}
+
+\begin{frame}[standout]
+  Questions?
+\end{frame}
+
+% ══════════════════════════════════════════════════════════════════════════
+\appendix
+
+\begin{frame}{Backup: Full Regression Table}
+  % Complete statistical results
+\end{frame}
+
+\begin{frame}{Backup: Model Fit Diagnostics}
+  % Residual plots, convergence, fit statistics
+\end{frame}
+
+\begin{frame}{Backup: Additional Analyses}
+  % Sensitivity analyses, robustness checks
+\end{frame}
+
+\begin{frame}{Backup: Code Example}
+  \begin{lstlisting}[language=Python]
+# Core analysis snippet
+import numpy as np
+results = model.fit(X_train, y_train)
+print(f"R2 = {results.rsquared:.3f}")
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Backup: Alternative Specifications}
+  % Results under different assumptions or parameters
+\end{frame}
+
+\end{document}

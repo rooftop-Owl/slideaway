@@ -2,11 +2,18 @@
 python-pptx>=1.0.0
 
 # Optional — install for the features you need
-# pip install slides[qa]       → visual QA thumbnail grids
-# pip install slides[browser]  → Playwright-based rendering
+# pip install slideaway[qa]       → visual QA + PDF tools + automation scripts
+# pip install slideaway[browser]  → Playwright-based rendering
+# pip install slideaway[all]      → everything
 
-# Pillow — for thumbnail_grid.py (visual QA overview grids)
+# Pillow — for thumbnail_grid.py, slides_to_pdf.py, PIL automation scripts
 # Pillow>=10.0.0
+
+# PyMuPDF — for pdf_to_images.py (PDF page → image conversion)
+# pymupdf>=1.23.0
+
+# NumPy — for visual-qa-automation PIL scripts (edge detection, contrast)
+# numpy>=1.24.0
 
 # Playwright — for Path B rendering in visual QA skill
 # playwright>=1.40.0

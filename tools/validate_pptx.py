@@ -33,6 +33,62 @@ BANNED_FONTS: frozenset[str] = frozenset({
     "sans-serif",
 })
 
+# K-Dense SLIDE_COUNT_GUIDELINES lookup table (verified against source).
+# Each key is a duration in minutes; values are (minimum, optimal, maximum) slide counts.
+# For non-standard durations: find nearest key via min(keys, key=lambda x: abs(x-duration)).
+SLIDE_COUNT_GUIDELINES: dict[int, tuple[int, int, int]] = {
+    5:  (5,  6,  8),
+    10: (8,  11, 14),
+    15: (13, 16, 20),
+    20: (18, 22, 26),
+    30: (22, 27, 33),
+    45: (32, 40, 50),
+    60: (40, 52, 65),
+}
+
+
+def validate_duration(pptx_path: str, duration_minutes: int, *, quiet: bool = False) -> bool:
+    """Validate slide count against duration-based guidelines.
+
+    Uses a lookup table (not linear multipliers) because the relationship
+    between talk length and optimal slide count is non-linear at longer durations.
+    """
+    from pptx import Presentation
+
+    prs = Presentation(pptx_path)
+    slide_count = len(prs.slides)
+
+    # Find nearest duration key
+    nearest = min(SLIDE_COUNT_GUIDELINES.keys(), key=lambda x: abs(x - duration_minutes))
+    minimum, optimal, maximum = SLIDE_COUNT_GUIDELINES[nearest]
+
+    if nearest != duration_minutes and not quiet:
+        print(f"INFO: Using guidelines for {nearest}-min talk (nearest to {duration_minutes} min)")
+
+    if slide_count < minimum:
+        verdict = "TOO FEW"
+        ok = False
+    elif slide_count > maximum:
+        verdict = "TOO MANY"
+        ok = False
+    else:
+        verdict = "WITHIN RANGE"
+        ok = True
+
+    if not quiet:
+        print(
+            f"{slide_count} slides for {duration_minutes}-minute talk: {verdict} "
+            f"(recommended: {minimum}\u2013{maximum}, optimal ~{optimal})"
+        )
+    elif not ok:
+        # Even in quiet mode, show warnings
+        print(
+            f"WARN: {slide_count} slides for {duration_minutes}-min talk: {verdict} "
+            f"(recommended: {minimum}\u2013{maximum})"
+        )
+
+    return ok
+
 def validate_style_compliance(pptx_path: str, theme: "Theme") -> tuple[list[str], list[str]]:
     """Validate font consistency and color palette adherence against a Theme preset.
 
@@ -121,6 +177,22 @@ def main() -> int:
             "'Click to add'). Reports each match as FAIL with slide number and matched text."
         ),
     )
+    parser.add_argument(
+        "--duration",
+        type=int,
+        default=None,
+        metavar="MINUTES",
+        help=(
+            "Validate slide count against duration-based guidelines. "
+            "Uses a lookup table for 5/10/15/20/30/45/60-minute talks. "
+            "Non-standard durations use nearest match. PPTX only."
+        ),
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress INFO messages; show only warnings and failures",
+    )
     args = parser.parse_args()
 
     result = validate_pptx_structure(
@@ -128,8 +200,9 @@ def main() -> int:
         allow_font_inheritance=args.allow_font_inheritance,
     )
 
-    for item in result.info:
-        print(f"INFO: {item}")
+    if not args.quiet:
+        for item in result.info:
+            print(f"INFO: {item}")
     for item in result.warnings:
         print(f"WARN: {item}")
     for item in result.errors:
@@ -180,8 +253,14 @@ def main() -> int:
                     print(f"FAIL: Slide {slide_idx}: placeholder text found: '...{snippet}...'")
                     placeholder_ok = False
 
-    if result.ok and style_ok and placeholder_ok:
-        print("PASS: structural inspection succeeded")
+    # Duration-aware validation — opt-in via --duration
+    duration_ok = True
+    if args.duration is not None:
+        duration_ok = validate_duration(args.pptx_path, args.duration, quiet=args.quiet)
+
+    if result.ok and style_ok and placeholder_ok and duration_ok:
+        if not args.quiet:
+            print("PASS: structural inspection succeeded")
         return 0
 
     print("FAIL: structural inspection failed")

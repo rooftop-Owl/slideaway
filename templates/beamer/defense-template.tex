@@ -1,0 +1,356 @@
+% Slideaway — Thesis/Dissertation Defense Template (30–45 min)
+% Theme: Boadilla/whale — formal, clean footline with author|title|page/total
+% Structural scaffolding only. Style/color theory → design-foundations.md
+% Engine workflow → engine-beamer.md
+
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usetheme{Boadilla}
+\usecolortheme{whale}
+
+\setbeamertemplate{navigation symbols}{}
+% Custom footline: frame N/total for committee tracking
+\setbeamertemplate{footline}{
+  \leavevmode
+  \hbox{
+    \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}
+      \usebeamerfont{author in head/foot}\insertshortauthor
+    \end{beamercolorbox}
+    \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}
+      \usebeamerfont{title in head/foot}\insertshorttitle
+    \end{beamercolorbox}
+    \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}
+      \usebeamerfont{date in head/foot}
+      \insertframenumber{}/\inserttotalframenumber\hspace*{2ex}
+    \end{beamercolorbox}
+  }
+  \vskip0pt
+}
+
+% Section dividers
+\AtBeginSection[]{
+  \begin{frame}
+    \vfill
+    \centering
+    \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+      \usebeamerfont{title}\insertsectionhead\par
+    \end{beamercolorbox}
+    \vfill
+  \end{frame}
+}
+
+% ── Packages ──────────────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage[backend=biber,style=authoryear]{biblatex}
+% \addbibresource{references.bib}
+
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  breaklines=true,
+  frame=single,
+}
+
+% ── Title Metadata ────────────────────────────────────────────────────────
+\title[Defense]{Dissertation Title: A Study of Something Important}
+\subtitle{PhD Dissertation Defense}
+\author[Candidate]{Candidate Name}
+\institute{Department of X \\ University of Y}
+\date{\today}
+
+% ══════════════════════════════════════════════════════════════════════════
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ── Committee ─────────────────────────────────────────────────────────────
+
+\begin{frame}{Defense Committee}
+  \begin{description}
+    \item[Chair] Prof.\ A (Department of X)
+    \item[Member] Prof.\ B (Department of Y)
+    \item[Member] Prof.\ C (Department of Z)
+    \item[External] Prof.\ D (Other University)
+  \end{description}
+  \note{Acknowledge each committee member by name. Set a respectful tone.}
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+% ── Dissertation Overview (2–3 slides, ~5 min) ───────────────────────────
+\section{Dissertation Overview}
+
+\begin{frame}{Motivation and Context}
+  \begin{itemize}
+    \item Broad problem area and its significance
+    \item Specific gap in current knowledge
+    \item Overarching research question
+  \end{itemize}
+  \note{Frame the entire dissertation in 90 seconds. Committee already read it — remind them of the arc.}
+\end{frame}
+
+\begin{frame}{Dissertation Structure}
+  \begin{table}
+    \caption{Chapter overview}
+    \begin{tabular}{clc}
+      \toprule
+      Chapter & Topic & Status \\
+      \midrule
+      1 & Introduction & Background \\
+      2 & Literature Review & Foundation \\
+      3 & Study 1: [Title] & Published \\
+      4 & Study 2: [Title] & Under Review \\
+      5 & Study 3: [Title] & Complete \\
+      6 & General Discussion & Synthesis \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+  \note{Show where each study fits. Publication status signals rigor.}
+\end{frame}
+
+% ── Study 1 (5–7 slides, ~8 min) ─────────────────────────────────────────
+\section{Study 1: [Title]}
+
+\begin{frame}{Study 1 — Motivation and Hypotheses}
+  \begin{itemize}
+    \item Specific question addressed by Study 1
+    \item Hypothesis H1a: ...
+    \item Hypothesis H1b: ...
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Study 1 — Methods}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Data \& Design}
+      \begin{itemize}
+        \item Data source and coverage
+        \item Experimental design
+        \item Sample size and power
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \framebox[\textwidth]{\parbox{0.9\textwidth}{\centering\vspace{2cm}Study 1 Design\vspace{2cm}}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Study 1 — Key Results}
+  \begin{center}
+    \framebox[0.8\textwidth]{\parbox{0.7\textwidth}{\centering\vspace{3cm}Study 1 Main Figure\vspace{3cm}}}
+  \end{center}
+  \note{Lead with the figure. State the key finding in one sentence.}
+\end{frame}
+
+\begin{frame}{Study 1 — Summary}
+  \begin{itemize}
+    \item H1a: Supported / Not supported — evidence summary
+    \item H1b: Supported / Not supported — evidence summary
+    \item Contribution to overall dissertation arc
+  \end{itemize}
+\end{frame}
+
+% ── Study 2 (5–7 slides, ~8 min) ─────────────────────────────────────────
+\section{Study 2: [Title]}
+
+\begin{frame}{Study 2 — Motivation and Hypotheses}
+  \begin{itemize}
+    \item How Study 2 builds on Study 1 findings
+    \item Hypothesis H2a: ...
+    \item Hypothesis H2b: ...
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Study 2 — Methods}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Data \& Design}
+      \begin{itemize}
+        \item Data source and coverage
+        \item Design choices and rationale
+        \item Analytical approach
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \framebox[\textwidth]{\parbox{0.9\textwidth}{\centering\vspace{2cm}Study 2 Design\vspace{2cm}}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Study 2 — Key Results}
+  \begin{center}
+    \framebox[0.8\textwidth]{\parbox{0.7\textwidth}{\centering\vspace{3cm}Study 2 Main Figure\vspace{3cm}}}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Study 2 — Summary}
+  \begin{itemize}
+    \item H2a: Supported / Not supported
+    \item H2b: Supported / Not supported
+    \item Contribution to overall dissertation arc
+  \end{itemize}
+\end{frame}
+
+% ── Study 3 (5–7 slides, ~8 min) ─────────────────────────────────────────
+\section{Study 3: [Title]}
+
+\begin{frame}{Study 3 — Motivation and Hypotheses}
+  \begin{itemize}
+    \item How Study 3 extends Studies 1 and 2
+    \item Hypothesis H3a: ...
+    \item Hypothesis H3b: ...
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Study 3 — Methods}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Data \& Design}
+      \begin{itemize}
+        \item Data source and coverage
+        \item Novel methodological contribution
+        \item Validation approach
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \framebox[\textwidth]{\parbox{0.9\textwidth}{\centering\vspace{2cm}Study 3 Design\vspace{2cm}}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Study 3 — Key Results}
+  \begin{center}
+    \framebox[0.8\textwidth]{\parbox{0.7\textwidth}{\centering\vspace{3cm}Study 3 Main Figure\vspace{3cm}}}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Study 3 — Summary}
+  \begin{itemize}
+    \item H3a: Supported / Not supported
+    \item H3b: Supported / Not supported
+    \item Contribution to overall dissertation arc
+  \end{itemize}
+\end{frame}
+
+% ── General Discussion (3–4 slides, ~7 min) ───────────────────────────────
+\section{General Discussion}
+
+\begin{frame}{Cross-Study Synthesis}
+  \begin{table}
+    \caption{Hypothesis support across studies}
+    \begin{tabular}{lccc}
+      \toprule
+      Hypothesis & Study 1 & Study 2 & Study 3 \\
+      \midrule
+      H1 & \checkmark & — & \checkmark \\
+      H2 & — & \checkmark & \checkmark \\
+      H3 & — & — & \checkmark \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+  \note{The synthesis table is the intellectual climax. Show how the pieces fit together.}
+\end{frame}
+
+\begin{frame}{Theoretical Contributions}
+  \begin{enumerate}
+    \item Contribution to theory or framework
+    \item New understanding enabled by this work
+    \item How this changes the field's perspective
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Practical Implications}
+  \begin{itemize}
+    \item Application 1: who benefits and how
+    \item Application 2: policy or practice implications
+    \item Broader impact statement
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Limitations}
+  \begin{itemize}
+    \item Scope limitations across all three studies
+    \item Methodological constraints and their impact
+    \item Generalizability caveats
+  \end{itemize}
+  \note{Committee expects honest self-assessment. Address likely questions proactively.}
+\end{frame}
+
+% ── Future Research Program (1–2 slides) ──────────────────────────────────
+\section{Future Research}
+
+\begin{frame}{Future Research Program}
+  \begin{enumerate}
+    \item Immediate follow-up: address Study 3 limitations
+    \item Next project: extend framework to new domain
+    \item Long-term vision: research trajectory post-defense
+  \end{enumerate}
+  \note{Show you have a program, not just a dissertation. Important for committee evaluation.}
+\end{frame}
+
+% ── Conclusion ────────────────────────────────────────────────────────────
+\section{Conclusion}
+
+\begin{frame}{Dissertation Summary}
+  \begin{enumerate}
+    \item Study 1 established [finding]
+    \item Study 2 demonstrated [finding]
+    \item Study 3 revealed [finding]
+    \item Together: [overarching contribution]
+  \end{enumerate}
+  \vfill
+  \small
+  Preprint: \url{https://arxiv.org/abs/xxxx.xxxxx} \\
+  Code: \url{https://github.com/your/repo}
+\end{frame}
+
+\begin{frame}{Acknowledgments}
+  \small
+  This work was supported by [Funding Agency, Grant \#].
+
+  Thank you to my advisor, committee, lab members, and family.
+
+  % \printbibliography
+\end{frame}
+
+\begin{frame}[standout]
+  Thank You — Questions?
+\end{frame}
+
+% ══════════════════════════════════════════════════════════════════════════
+\appendix
+
+\begin{frame}{Backup: Full Regression Tables}
+  % Complete statistical output for all three studies
+\end{frame}
+
+\begin{frame}{Backup: Model Fit \& Diagnostics}
+  % Residuals, convergence, goodness-of-fit across studies
+\end{frame}
+
+\begin{frame}{Backup: Alternative Analyses}
+  % Robustness checks, sensitivity to assumptions
+\end{frame}
+
+\begin{frame}{Backup: Extended Literature}
+  % Additional citations committee might ask about
+\end{frame}
+
+\begin{frame}{Backup: Methodological Details}
+  % Implementation specifics, parameter choices, code architecture
+\end{frame}
+
+\end{document}

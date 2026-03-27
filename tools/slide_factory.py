@@ -588,7 +588,7 @@ class SlideFactory:
             pic_left = Emu((self._slide_width() - int(pic_w)) // 2)
             pic_top = Emu(int(self.body_top) + (int(max_h) - int(pic_h)) // 2)
             slide.shapes.add_picture(image_path, pic_left, pic_top, width=pic_w, height=pic_h)
-        except Exception:
+        except (ImportError, OSError, ValueError, ZeroDivisionError):
             pic = slide.shapes.add_picture(image_path, Emu(0), Emu(0), width=max_w)
             if int(pic.height) > int(max_h):
                 ratio = int(max_h) / int(pic.height)

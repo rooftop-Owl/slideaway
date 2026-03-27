@@ -34,6 +34,12 @@ When generating with a specific engine, you MUST read the corresponding referenc
 - For ALL outputs → read `references/design-principles.md` (presentation intelligence)
 - Before delivery → read `references/validation-patterns.md`
 - `--refine` enabled → run Phase 5.5 and apply visual QA references (`presentation-visual-qa` + design-principles J.11) with delegated `slide-qa` inspection
+- Academic/scientific talk type specified (conference/seminar/defense/grant/journal-club) → read `references/talk-types.md`
+- User specifies duration OR asks about timing/practice → read `references/timing-guidelines.md`
+- Creating data-heavy slides with charts, plots, or figures → read `references/data-visualization.md`
+- Need design theory (why certain typography/color/layout choices) → read `../presentation-design-styles/references/design-foundations.md`
+- Evaluating whether slides support delivery (opening/closing/transitions/Q&A) → delegate to `slide-qa` agent with `../presentation-visual-qa/references/delivery-intelligence.md`
+- Reviewing rendered slides OR using pdf_to_images.py → load `../presentation-visual-qa/references/visual-qa-automation.md`; NEVER read PDF files directly
 
 ## Minimum Required Context
 
@@ -311,8 +317,14 @@ Verification separation (required):
 - `references/engine-md2pptx.md` — Section C (md2pptx)
 - `references/engine-pptx.md` — Section D (python-pptx + SlideFactory)
 - `references/engine-revealjs.md` — Section E (reveal.js)
-- `references/engine-beamer.md` — Section F (Beamer LaTeX)
+- `references/engine-beamer.md` — Section F (Beamer LaTeX). 4 templates available: metropolis, conference, seminar, defense
 - `references/engine-html.md` — Sections G + H (Standalone HTML + RISE)
 - `references/poster-design.md` — Section I (tikzposter)
 - `references/design-principles.md` — Section J (presentation intelligence)
 - `references/validation-patterns.md` — Section K (validation and delivery gate)
+- `references/talk-types.md` — Per-type depth (extends J.1)
+- `references/timing-guidelines.md` — Operational timing guidance (extends J.4)
+- `references/data-visualization.md` — Chart types and figure preparation
+- `../presentation-design-styles/references/design-foundations.md` — Typography, color theory, layout composition
+- `../presentation-visual-qa/references/delivery-intelligence.md` — Slide design for delivery support
+- `../presentation-visual-qa/references/visual-qa-automation.md` — PIL automation scripts, issue log, stopping criteria

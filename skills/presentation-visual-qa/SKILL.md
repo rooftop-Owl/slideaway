@@ -272,3 +272,8 @@ Recommended order:
 4. run visual checklist (this skill — checklist above)
 5. record verdict and deliver
 ```
+
+## Additional References
+
+For delivery-optimized slide design: see `references/delivery-intelligence.md`
+For automated QA tools and stopping criteria: see `references/visual-qa-automation.md` (NEVER read PDF directly)

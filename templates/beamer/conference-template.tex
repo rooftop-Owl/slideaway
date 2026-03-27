@@ -1,0 +1,183 @@
+% Slideaway — Conference Talk Template (15–20 min)
+% Theme: Madrid/beaver — classic institutional style for AGU/EGU/AMS/NeurIPS
+% Structural scaffolding only. Style/color theory → design-foundations.md
+% Engine workflow → engine-beamer.md
+
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{beaver}
+
+% Remove navigation clutter — frame numbers suffice for conference talks
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% ── Packages ──────────────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage[backend=biber,style=authoryear]{biblatex}
+% \addbibresource{references.bib}  % Uncomment and point to your .bib file
+
+% ── Title Metadata ────────────────────────────────────────────────────────
+\title[Short Title]{Full Presentation Title}
+\subtitle{Conference Name — Session ID}
+\author[A.~Author]{Author Name\inst{1} \and Co-Author Name\inst{2}}
+\institute[Inst]{
+  \inst{1}Department of X, University of Y \and
+  \inst{2}Agency Z
+}
+\date{\today}
+
+% ══════════════════════════════════════════════════════════════════════════
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ── Introduction (2–3 slides, ~3 min) ─────────────────────────────────────
+\section{Introduction}
+
+\begin{frame}{The Problem}
+  % Hook: surprising statistic, provocative question, or data teaser
+  \begin{itemize}
+    \item<1-> Context and motivation — why this matters now
+    \item<2-> Background — what is known
+    \item<3-> Research question or hypothesis
+  \end{itemize}
+  \note{Open with energy. State the gap clearly. Keep background to 90 seconds max.}
+\end{frame}
+
+% ── Methods (2 slides, ~3 min) ────────────────────────────────────────────
+\section{Methods}
+
+\begin{frame}{Approach}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Design}
+      \begin{itemize}
+        \item Data sources and coverage
+        \item Experimental design or model setup
+        \item Key parameters and choices
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      % Replace with your method diagram
+      \framebox[\textwidth]{\parbox{0.9\textwidth}{\centering\vspace{2cm}Method Diagram\vspace{2cm}}}
+    \end{column}
+  \end{columns}
+  \note{Emphasize what is novel. Skip standard details the audience can read in the paper.}
+\end{frame}
+
+\begin{frame}{Analysis Pipeline}
+  \begin{enumerate}
+    \item Pre-processing and quality control
+    \item Core analysis or model execution
+    \item Post-processing and evaluation metrics
+  \end{enumerate}
+  \note{Keep it high-level. Backup slides cover implementation details.}
+\end{frame}
+
+% ── Results (6–8 slides, ~8 min) ──────────────────────────────────────────
+\section{Results}
+
+\begin{frame}{Result 1 — Main Finding}
+  \begin{center}
+    % Replace with your key figure
+    \framebox[0.8\textwidth]{\parbox{0.7\textwidth}{\centering\vspace{3cm}Key Result Figure\vspace{3cm}}}
+  \end{center}
+  \note{Lead with the figure. State the takeaway in one sentence. Let the visual carry the weight.}
+\end{frame}
+
+\begin{frame}{Result 2 — Supporting Evidence}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \framebox[\textwidth]{\parbox{0.9\textwidth}{\centering\vspace{2cm}Figure A\vspace{2cm}}}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \framebox[\textwidth]{\parbox{0.9\textwidth}{\centering\vspace{2cm}Figure B\vspace{2cm}}}
+    \end{column}
+  \end{columns}
+  \note{Compare side-by-side. Point out the specific feature that supports your argument.}
+\end{frame}
+
+\begin{frame}{Result 3 — Quantitative Summary}
+  \begin{table}
+    \caption{Performance comparison}
+    \begin{tabular}{lcc}
+      \toprule
+      Method & Metric A & Metric B \\
+      \midrule
+      Baseline & 0.72 & 0.81 \\
+      Proposed & \textbf{0.89} & \textbf{0.94} \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+  \note{Bold your best numbers. Mention statistical significance if applicable.}
+\end{frame}
+
+% ── Discussion (1–2 slides, ~2 min) ───────────────────────────────────────
+\section{Discussion}
+
+\begin{frame}{Interpretation and Implications}
+  \begin{itemize}
+    \item What the results mean in context of existing work
+    \item Broader implications for the field
+    \item Known limitations and caveats
+  \end{itemize}
+  \note{Be honest about limitations. Reviewers and audiences respect candor.}
+\end{frame}
+
+% ── Conclusion (1 slide, ~1 min) ──────────────────────────────────────────
+\section{Conclusion}
+
+\begin{frame}{Key Takeaways}
+  \begin{enumerate}
+    \item First main conclusion
+    \item Second main conclusion
+    \item Future work direction
+  \end{enumerate}
+  \vfill
+  \small
+  Code: \url{https://github.com/your/repo} \\
+  Contact: \href{mailto:you@example.com}{you@example.com}
+  \note{End with 3 crisp assertions. Show the repo link. Invite questions.}
+\end{frame}
+
+% ── Acknowledgments ───────────────────────────────────────────────────────
+
+\begin{frame}{Acknowledgments}
+  \small
+  This work was supported by [Funding Agency, Grant \#].
+
+  We thank [collaborators/reviewers] for helpful discussions.
+
+  % \printbibliography  % Uncomment if using biblatex
+\end{frame}
+
+% ── Q\&A ──────────────────────────────────────────────────────────────────
+
+\begin{frame}[standout]
+  Questions?
+\end{frame}
+
+% ══════════════════════════════════════════════════════════════════════════
+\appendix
+
+\begin{frame}{Backup: Detailed Methods}
+  % Extended methodology for anticipated questions
+  \note{Have 3–5 backup slides ready. Label them clearly.}
+\end{frame}
+
+\begin{frame}{Backup: Sensitivity Analysis}
+  % Parameter sensitivity, robustness checks
+\end{frame}
+
+\begin{frame}{Backup: Additional Results}
+  % Supplementary figures/tables that didn't fit the main talk
+\end{frame}
+
+\end{document}

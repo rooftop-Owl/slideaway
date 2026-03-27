@@ -13,17 +13,5 @@
     "plugin",
     "design",
     "visual"
-  ],
-  "agents": {
-    "path": "agents"
-  },
-  "hooks": {
-    "path": "hooks"
-  },
-  "skills": {
-    "path": "skills"
-  },
-  "commands": {
-    "path": "commands"
-  }
+  ]
 }

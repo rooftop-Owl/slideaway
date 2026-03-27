@@ -150,6 +150,7 @@ When `--no-coach` is present, skip Phase 0 entirely. This is the legacy v2.0/v2.
 1. Use provided flags for engine (`--engine`), style (`--style`), duration (`--slides`), format (`--format`)
 2. Skip slide-coach invocation — no discovery, no brief, no approval gate
 3. Proceed directly to Phase 1 (engine resolution) using the flag-based decision matrix
+3.5. Run **Phase 0.1 (Environment Gate)** — this applies even on `--no-coach` path. Verify the selected engine's deps work before generating content.
 4. Phases 3–4 (content review, design review) still run unless explicitly skipped
 
 **When to use**: Automated pipelines, agent-to-agent delegation with pre-computed parameters, or users who want direct engine control without the conversational flow.

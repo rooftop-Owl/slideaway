@@ -134,6 +134,9 @@ cat > /tmp/_slideaway_beamer_smoke.tex << 'SMOKE'
 \end{document}
 SMOKE
 
+# Clean up temp files on exit
+trap 'rm -f /tmp/_slideaway_beamer_smoke.*' EXIT
+
 # Try tectonic first, fall back to pdflatex
 if command -v tectonic &>/dev/null; then
   tectonic /tmp/_slideaway_beamer_smoke.tex -o /tmp/ 2>&1

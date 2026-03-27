@@ -64,12 +64,12 @@
         "required": false,
         "engines": ["reveal", "beamer"]
       },
-      "pdflatex": {
-        "check": "pdflatex --version 2>/dev/null",
-        "install": "Install TeX Live or MiKTeX",
+      "tex-engine": {
+        "check": "command -v tectonic &>/dev/null && echo 'tectonic' || pdflatex --version 2>/dev/null",
+        "install": "conda install -c conda-forge tectonic (recommended) | apt install texlive-latex-extra (Debian/Ubuntu) | dnf install texlive-scheme-basic texlive-beamer (RHEL/Rocky)",
         "required": false,
+        "note": "Prefers tectonic (auto-downloads packages). Falls back to pdflatex if available.",
         "engines": ["beamer"]
-      }
     }
   }
 }

@@ -76,6 +76,104 @@ Beamer is the gold standard for academic conference talks. Full LaTeX power: equ
 \end{document}
 ```
 
+### Known-Good Preambles (USE VERBATIM)
+
+Each Beamer template has a tested, minimal preamble. The generator MUST use these verbatim — never invent custom `\setbeamertemplate` overrides. Style customization is done exclusively via `\setbeamercolor` and `\definecolor`.
+
+**Rule**: Theme handles structure. Colors handle branding. Never mix the two.
+
+#### Metropolis (default)
+
+```latex
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{metropolis}
+% Style: color overrides ONLY
+\definecolor{BrandPrimary}{HTML}{2C3E6B}
+\definecolor{BrandAccent}{HTML}{E74C3C}
+\setbeamercolor{frametitle}{bg=BrandPrimary, fg=white}
+\setbeamercolor{progress bar}{fg=BrandPrimary}
+\setbeamercolor{alerted text}{fg=BrandAccent}
+\setbeamertemplate{navigation symbols}{}
+% TikZ (safe with metropolis)
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+```
+
+#### Conference (Madrid/beaver)
+
+```latex
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{Madrid}
+\usecolortheme{beaver}
+% Style: color overrides ONLY
+\definecolor{BrandPrimary}{HTML}{8B0000}
+\setbeamercolor{structure}{fg=BrandPrimary}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+% TikZ (safe with Madrid)
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+```
+
+#### Seminar (Madrid/dolphin)
+
+```latex
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+% Style: color overrides ONLY
+\definecolor{BrandPrimary}{HTML}{1A5276}
+\setbeamercolor{structure}{fg=BrandPrimary}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+% Section dividers (safe — uses built-in template, not custom)
+\AtBeginSection[]{
+  \begin{frame}
+    \vfill\centering
+    \usebeamerfont{title}\insertsectionhead\par
+    \vfill
+  \end{frame}
+}
+% TikZ (safe with Madrid)
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+```
+
+#### Defense (Boadilla/whale)
+
+```latex
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{Boadilla}
+\usecolortheme{whale}
+% Style: color overrides ONLY
+\definecolor{BrandPrimary}{HTML}{1B2A4A}
+\setbeamercolor{structure}{fg=BrandPrimary}
+\setbeamertemplate{navigation symbols}{}
+% Frame number footline (safe — uses built-in mechanism)
+\setbeamertemplate{footline}{
+  \hfill\insertframenumber{}/\inserttotalframenumber\hspace*{2ex}\vskip2pt
+}
+% Section dividers
+\AtBeginSection[]{
+  \begin{frame}
+    \vfill\centering
+    \usebeamerfont{title}\insertsectionhead\par
+    \vfill
+  \end{frame}
+}
+% TikZ (safe with Boadilla)
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+```
+
+#### Adapting Colors for a Style Preset
+
+To apply a slideaway style preset (#16, #17, etc.) to Beamer:
+1. Look up the preset's `primary`, `accent`, and `text` hex values from `presentation-design-styles/references/styles.md`
+2. `\definecolor{BrandPrimary}{HTML}{...}` with the preset's primary color
+3. `\definecolor{BrandAccent}{HTML}{...}` with the preset's accent color
+4. Apply via `\setbeamercolor` — NEVER via `\setbeamertemplate`
+5. Do NOT set `background canvas` or `normal text` bg colors — let the theme handle backgrounds
 ### Compilation
 
 **Preferred: `tectonic`** (auto-downloads packages, no TikZ version issues):
@@ -98,11 +196,68 @@ pdflatex slides.tex && bibtex slides && pdflatex slides.tex && pdflatex slides.t
 
 ### Known Issue: conda texlive-core + TikZ
 
-> **`\tikzscope@linewidth` undefined** — conda's `texlive-core` package ships a minimal TeX distribution that lacks TikZ/PGF scope internals required by Beamer themes (Madrid, Boadilla, etc.). The format file (`pdflatex.fmt`) may also fail to generate.
->
-> **Fix**: Use `tectonic` instead (auto-downloads missing packages on first run), or install a full TeX Live via system package manager (`apt install texlive-full`).
+> **`\tikzscope@linewidth` undefined** — conda's `texlive-core` package ships a minimal TeX distribution that lacks TikZ/PGF scope internals required by Beamer themes (Madrid, Boadilla, etc.). The format file (`pdflatex.fmt`) may also fail to generate (`Can't locate mktexlsr.pl in @INC`).
 >
 > **Do NOT** attempt to fix by downgrading Beamer themes — the issue is in the TeX distribution, not the templates.
+
+### Installation Guide (by distro)
+
+| Environment | Command | Notes |
+|-------------|---------|-------|
+| **tectonic (recommended)** | `conda install -c conda-forge tectonic` or `cargo install tectonic` | Zero-config: auto-downloads ALL packages on first compile. Works everywhere. |
+| **Ubuntu/Debian** | `sudo apt install texlive-latex-extra texlive-fonts-recommended` | System TeX Live with Beamer + fonts |
+| **Rocky/RHEL 8-9** | `sudo dnf install texlive-scheme-basic texlive-beamer` | NOT `scheme-medium` (doesn't exist on RHEL 8) |
+| **Fedora** | `sudo dnf install texlive-scheme-medium` | Includes Beamer and metropolis |
+| **macOS** | `brew install --cask mactex-no-gui` | Full TeX Live |
+| **conda** | ⚠️ `texlive-core` has broken pdflatex — use `tectonic` instead | `mktexfmt` fails with Perl path errors |
+| **No root access** | Download installer from [tug.org/texlive](https://tug.org/texlive/) → install to `~/texlive/` | Manual profile creation, ~10 min |
+| **Zero-install** | `tectonic` via conda or single binary | [github.com/tectonic-typesetting/tectonic](https://github.com/tectonic-typesetting/tectonic) |
+
+**After installing, verify with the smoke test (see Environment Gate below).**
+
+### Environment Gate (Phase 0.1 — MANDATORY before Beamer generation)
+
+Between engine selection and content generation, run a **5-line smoke test** to verify the TeX toolchain actually works:
+
+```bash
+# Smoke test: minimal metropolis + TikZ
+cat > /tmp/_slideaway_beamer_smoke.tex << 'SMOKE'
+\documentclass{beamer}
+\usetheme{metropolis}
+\usepackage{tikz}
+\begin{document}
+\begin{frame}{Smoke Test}
+\begin{tikzpicture}\draw (0,0) -- (1,1);\end{tikzpicture}
+\end{frame}
+\end{document}
+SMOKE
+
+# Clean up temp files on exit
+trap 'rm -f /tmp/_slideaway_beamer_smoke.*' EXIT
+
+# Try tectonic first, fall back to pdflatex
+if command -v tectonic &>/dev/null; then
+  tectonic /tmp/_slideaway_beamer_smoke.tex -o /tmp/ 2>&1
+elif command -v pdflatex &>/dev/null; then
+  pdflatex -halt-on-error -interaction=nonstopmode -output-directory=/tmp /tmp/_slideaway_beamer_smoke.tex 2>&1
+else
+  echo 'ERROR: No TeX engine found. Install tectonic or texlive.'
+  exit 1
+fi
+
+# Check exit code
+if [ $? -eq 0 ]; then
+  echo 'BEAMER SMOKE TEST: PASS'
+else
+  echo 'BEAMER SMOKE TEST: FAIL'
+  echo 'Beamer engine is not usable. Suggestions:'
+  echo '  1. Install tectonic: conda install -c conda-forge tectonic'
+  echo '  2. Use Marp as alternative: /slides "topic" --engine marp --format pdf'
+  exit 1
+fi
+```
+
+**If smoke test fails**: the agent MUST suggest Marp (`--engine marp --format pdf`) as zero-dependency alternative and NOT proceed with Beamer generation. Do NOT generate 800 lines of LaTeX that will fail to compile.
 
 ### Beamer Gotchas
 

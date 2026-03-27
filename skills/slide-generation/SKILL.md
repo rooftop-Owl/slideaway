@@ -150,6 +150,7 @@ When `--no-coach` is present, skip Phase 0 entirely. This is the legacy v2.0/v2.
 1. Use provided flags for engine (`--engine`), style (`--style`), duration (`--slides`), format (`--format`)
 2. Skip slide-coach invocation — no discovery, no brief, no approval gate
 3. Proceed directly to Phase 1 (engine resolution) using the flag-based decision matrix
+3.5. Run **Phase 0.1 (Environment Gate)** — this applies even on `--no-coach` path. Verify the selected engine's deps work before generating content.
 4. Phases 3–4 (content review, design review) still run unless explicitly skipped
 
 **When to use**: Automated pipelines, agent-to-agent delegation with pre-computed parameters, or users who want direct engine control without the conversational flow.
@@ -157,6 +158,34 @@ When `--no-coach` is present, skip Phase 0 entirely. This is the legacy v2.0/v2.
 **Philosophy**: Flags are for agents. Conversation is for humans. The default human path is always Phase 0.
 
 ---
+
+## Phase 0.1: Environment Gate (MANDATORY after engine resolution)
+
+After Phase 0 selects an engine (or --no-coach path specifies one), verify the engine's dependencies actually work BEFORE generating any content.
+
+### Why This Gate Exists
+
+Without this check, the pipeline generates hundreds of lines of engine-specific code (e.g., 800+ lines of LaTeX) only to fail at compile time. Debugging broken TeX installations costs 30-60 minutes. The gate catches this in 5 seconds.
+
+### How It Works
+
+1. Look up the selected engine in `module.json` → `dependencies.runtime` → `check` command
+2. Run the check command. If it fails → suggest installation (see `engine-beamer.md` Installation Guide) or offer engine fallback
+3. For Beamer specifically: run the **smoke test** from `engine-beamer.md` → Environment Gate section (minimal metropolis + TikZ compile)
+4. If smoke test fails → suggest `--engine marp --format pdf` as zero-dependency alternative
+5. Only proceed to Phase 2 (generation) after the gate passes
+
+### Engine Fallback Table
+
+| Failed Engine | Fallback | Flag Override |
+|---------------|----------|---------------|
+| Beamer (no pdflatex/tectonic) | Marp PDF | `--engine marp --format pdf` |
+| Marp (no marp-cli) | Standalone HTML | `--engine html` |
+| reveal.js (no pandoc) | Marp HTML | `--engine marp --format html` |
+| RISE (no Jupyter) | Standalone HTML | `--engine html` |
+| python-pptx (no pptx module) | md2pptx (bundled) | `--engine md2pptx` |
+
+**The agent should suggest the fallback naturally** ("Beamer isn't available on this system — I'll use Marp to generate a PDF instead"), not ask the user to install packages.
 
 ## Minimum Required Context
 

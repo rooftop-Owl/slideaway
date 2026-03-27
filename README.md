@@ -1,7 +1,7 @@
 # 🎯 Slideaway
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.2.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-2.3.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/engines-7-green?style=for-the-badge" alt="7 Engines">
   <img src="https://img.shields.io/badge/styles-30-purple?style=for-the-badge" alt="30 Styles">
   <img src="https://img.shields.io/badge/agents-3-red?style=for-the-badge" alt="3 Agents">
@@ -144,7 +144,7 @@ slides/
 
 ## Architecture
 
-Slideaway v2.2 uses a **multi-agent pipeline** with 6 phases. Three specialized agents handle discovery, content review, and design QA — separating concerns so no single agent is both producer and judge.
+Slideaway v2.3 uses a **multi-agent pipeline** with 7 phases. Two compile-safety gates (Phase 0.1 and Phase 4.5) prevent broken output from reaching delivery.
 
 ```
 /slides "topic"
@@ -152,6 +152,11 @@ Slideaway v2.2 uses a **multi-agent pipeline** with 6 phases. Three specialized 
     ├─► Phase 0: Discovery (slide-coach)
     │       Audience analysis → narrative arc → brief → outline
     │       Conversational: asks clarifying questions before proceeding
+    │
+    ├─► Phase 0.1: Environment Gate (HARD GATE)
+    │       Verifies engine deps compile before generating content
+    │       Beamer: smoke-compiles metropolis + TikZ (5s check)
+    │       Fallback routing if engine unavailable
     │
     ├─► Phase 1: Engine Resolution (auto)
     │       Marp │ md2pptx │ python-pptx │ reveal.js │ Beamer │ HTML │ RISE
@@ -170,6 +175,11 @@ Slideaway v2.2 uses a **multi-agent pipeline** with 6 phases. Three specialized 
     │       4 dimensions: layout, typography, color harmony, contrast
     │       Up to 3 review rounds (converges or accepts)
     │
+    ├─► Phase 4.5: Compile Check (HARD GATE — compilable engines)
+    │       Compiles generated output; auto-fix loop (max 2 attempts)
+    │       Error classification → targeted preamble fix or known-good fallback
+    │       Honest HALT if unresolvable — never claims success on broken output
+    │
     └─► Phase 5: Delivery
             Final output + delivery notes (timing, speaker notes, handouts)
 ```
@@ -184,7 +194,7 @@ Slideaway v2.2 uses a **multi-agent pipeline** with 6 phases. Three specialized 
 | **python-pptx** | Programmatic, styled | PPTX (editable) | python-pptx (pip) |
 | **md2pptx** | Markdown→PowerPoint | PPTX (editable) | Bundled |
 | **reveal.js** | Web presentations | HTML | pandoc |
-| **Beamer** | Academic LaTeX | PDF | pdflatex |
+| **Beamer** | Academic LaTeX | PDF | tectonic (preferred) or pdflatex |
 | **HTML** | Zero-dep browser | HTML | None |
 | **RISE** | Jupyter notebooks | HTML | Jupyter |
 
@@ -201,6 +211,34 @@ Slideaway v2.2 uses a **multi-agent pipeline** with 6 phases. Three specialized 
 ```
 
 ---
+
+## Beamer Safety
+
+Beamer's LaTeX pipeline is the most dependency-heavy engine. v2.3 ships two safety gates:
+
+**Phase 0.1 — Environment Gate**: Before generating any content, slideaway smoke-compiles a minimal metropolis + TikZ document. If it fails, you get a distro-specific install guide and engine fallback (Marp PDF) instead of a 30-minute debugging session.
+
+**Phase 4.5 — Compile Check**: After generation, the output `.tex` is compiled and the exit code verified. If compilation fails, an auto-fix loop (max 2 attempts) classifies the error and applies a targeted fix — usually swapping a broken preamble for a known-good one. If unresolvable, slideaway reports the error honestly with the `.tex` source and stops. It never claims success on a file that doesn't build.
+
+**Known-good preambles**: Four tested Beamer preambles ship with the plugin. The generator uses these verbatim — never invents template overrides.
+
+| Template | Theme |
+|----------|-------|
+| Metropolis (default) | `\usetheme{metropolis}` |
+| Conference | `\usetheme{Madrid}\usecolortheme{beaver}` |
+| Seminar | `\usetheme{Madrid}\usecolortheme{dolphin}` |
+| Defense | `\usetheme{Boadilla}\usecolortheme{whale}` |
+
+Rule: **Theme handles structure. Colors handle branding. Never mix.**
+
+Install tectonic (preferred over pdflatex for conda environments):
+
+```bash
+conda install -c conda-forge tectonic   # conda
+brew install tectonic                   # macOS
+cargo install tectonic                  # cargo
+```
+
 
 ## Styles
 

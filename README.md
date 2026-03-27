@@ -42,9 +42,9 @@ Most presentation tools generate generic AI output. Slideaway enforces quality t
 
 | Skill | Description |
 |-------|-------------|
-| **slide-generation** | Progressive disclosure core (318 lines) + 9 phase-loaded reference files. 7 engines, audience intelligence, narrative structure. |
-| **presentation-design-styles** | 30 curated styles across 6 categories. Mood→preset mapping. Anti-AI-slop font/color bans. |
-| **presentation-visual-qa** | Two rendering paths (wkhtmltoimage + Playwright). Inspection checklist. PASS/FAIL verdicts. |
+| **slide-generation** | Progressive disclosure core (330 lines) + 15 phase-loaded reference files. 7 engines, audience intelligence, narrative structure, academic talk types, timing guidance, data visualization. |
+| **presentation-design-styles** | 30 curated styles across 6 categories. Mood→preset mapping. Anti-AI-slop font/color bans. Design foundations (typography, color theory, layout). |
+| **presentation-visual-qa** | Two rendering paths (wkhtmltoimage + Playwright). Inspection checklist. PASS/FAIL verdicts. Delivery intelligence. Automated PIL scripts for edge/contrast detection. |
 
 ### Agents
 
@@ -80,8 +80,10 @@ Most presentation tools generate generic AI output. Slideaway enforces quality t
 | Tool | Purpose |
 |------|---------|
 | `slide_factory.py` | python-pptx factory with 30 Theme presets |
-| `validate_pptx.py` | Structural + style compliance + placeholder detection |
+| `validate_pptx.py` | Structural + style compliance + placeholder detection + `--duration` validation |
 | `thumbnail_grid.py` | QA overview grid from slide screenshots |
+| `pdf_to_images.py` | PDF→images converter (PyMuPDF) for visual QA workflow |
+| `slides_to_pdf.py` | Combine slide images into PDF handouts (Pillow) |
 | `html2pptx/` | HTML→PPTX conversion pipeline |
 | `pptx_editor/` | XML-level PPTX manipulation (unpack/edit/pack) |
 | `md2pptx/` | Markdown→PPTX via bundled md2pptx |
@@ -98,20 +100,21 @@ slides/
 │   └── slide-qa.md             # Visual QA agent
 ├── commands/
 │   └── slides.md               # /slides command definition
-├── skills/
-│   ├── slide-generation/       # 7-engine generation workflows
-│   ├── presentation-design-styles/  # 30 styles, 5 presets, anti-patterns
-│   └── presentation-visual-qa/ # Visual rendering checks, Playwright
+│   ├── slide-generation/       # 7-engine workflows + 15 reference files
+│   ├── presentation-design-styles/  # 30 styles, anti-patterns, design foundations
+│   └── presentation-visual-qa/ # Visual QA, delivery intelligence, automation scripts
 ├── tools/
 │   ├── slide_factory.py        # python-pptx helper (16:9, styling)
-│   ├── validate_pptx.py        # Structural PPTX inspection CLI
+│   ├── validate_pptx.py        # Structural PPTX inspection CLI + --duration
 │   ├── thumbnail_grid.py       # Slide thumbnail grid generator
+│   ├── pdf_to_images.py        # PDF→images (PyMuPDF)
+│   ├── slides_to_pdf.py        # Images→PDF combiner (Pillow)
 │   ├── html2pptx/              # HTML → PPTX conversion pipeline
 │   ├── pptx_editor/            # PPTX editing utilities
 │   └── md2pptx/                # Bundled md2pptx (NOT on PyPI)
 ├── templates/
 │   ├── marp/                   # default.css, academic.css, .marprc.yml
-│   ├── beamer/                 # metropolis-template.tex
+│   ├── beamer/                 # 4 templates: metropolis, conference, seminar, defense
 │   └── html/                   # slide-template.html, deck-template.html
 ├── handbook/
 │   ├── getting-started.md
@@ -209,11 +212,20 @@ Use `--preview` to generate 2–3 style variants before committing to a full dec
 
 ```
 Core: pip install python-pptx
-QA:   pip install slideaway[qa]       # Pillow for thumbnail grids
-Full: pip install slideaway[all]      # Pillow + Playwright
+QA:   pip install slideaway[qa]       # Pillow + PyMuPDF + NumPy
+Full: pip install slideaway[all]      # QA + Playwright
 ```
 
-Optional runtime tools:
+**Python optional packages** (via `pip install slideaway[qa]`):
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `Pillow` | ≥10.0.0 | Thumbnail grids, slides_to_pdf.py, PIL automation scripts |
+| `pymupdf` | ≥1.23.0 | pdf_to_images.py (PDF page → image conversion) |
+| `numpy` | ≥1.24.0 | Visual QA automation scripts (edge detection, contrast) |
+| `playwright` | ≥1.40.0 | Path B rendering in visual QA skill |
+
+**Optional runtime tools:**
 
 | Tool | Install | Required By |
 |------|---------|-------------|
@@ -230,7 +242,7 @@ All dependencies are optional — engines degrade gracefully with install guidan
 ## Philosophy
 
 - **Workflow over Capability** — Models improve; workflow skills get better with them
-- **Progressive Disclosure** — 318-line core loads 9 reference files on demand, not 1,650 lines upfront
+- **Progressive Disclosure** — 330-line core loads 15 reference files on demand, not everything upfront
 - **Producer ≠ Verifier** — slide-designer generates, slide-qa inspects independently
 - **Anti-AI-Slop** — Banned fonts (Inter, Roboto, Arial), banned colors (#6366f1), distinctive presets enforce visual identity
 

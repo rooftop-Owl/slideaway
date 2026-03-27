@@ -98,11 +98,65 @@ pdflatex slides.tex && bibtex slides && pdflatex slides.tex && pdflatex slides.t
 
 ### Known Issue: conda texlive-core + TikZ
 
-> **`\tikzscope@linewidth` undefined** — conda's `texlive-core` package ships a minimal TeX distribution that lacks TikZ/PGF scope internals required by Beamer themes (Madrid, Boadilla, etc.). The format file (`pdflatex.fmt`) may also fail to generate.
->
-> **Fix**: Use `tectonic` instead (auto-downloads missing packages on first run), or install a full TeX Live via system package manager (`apt install texlive-full`).
+> **`\tikzscope@linewidth` undefined** — conda's `texlive-core` package ships a minimal TeX distribution that lacks TikZ/PGF scope internals required by Beamer themes (Madrid, Boadilla, etc.). The format file (`pdflatex.fmt`) may also fail to generate (`Can't locate mktexlsr.pl in @INC`).
 >
 > **Do NOT** attempt to fix by downgrading Beamer themes — the issue is in the TeX distribution, not the templates.
+
+### Installation Guide (by distro)
+
+| Environment | Command | Notes |
+|-------------|---------|-------|
+| **tectonic (recommended)** | `conda install -c conda-forge tectonic` or `cargo install tectonic` | Zero-config: auto-downloads ALL packages on first compile. Works everywhere. |
+| **Ubuntu/Debian** | `sudo apt install texlive-latex-extra texlive-fonts-recommended` | System TeX Live with Beamer + fonts |
+| **Rocky/RHEL 8-9** | `sudo dnf install texlive-scheme-basic texlive-beamer` | NOT `scheme-medium` (doesn't exist on RHEL 8) |
+| **Fedora** | `sudo dnf install texlive-scheme-medium` | Includes Beamer and metropolis |
+| **macOS** | `brew install --cask mactex-no-gui` | Full TeX Live |
+| **conda** | ⚠️ `texlive-core` has broken pdflatex — use `tectonic` instead | `mktexfmt` fails with Perl path errors |
+| **No root access** | Download installer from [tug.org/texlive](https://tug.org/texlive/) → install to `~/texlive/` | Manual profile creation, ~10 min |
+| **Zero-install** | `tectonic` via conda or single binary | [github.com/tectonic-typesetting/tectonic](https://github.com/tectonic-typesetting/tectonic) |
+
+**After installing, verify with the smoke test (see Environment Gate below).**
+
+### Environment Gate (Phase 0.1 — MANDATORY before Beamer generation)
+
+Between engine selection and content generation, run a **5-line smoke test** to verify the TeX toolchain actually works:
+
+```bash
+# Smoke test: minimal metropolis + TikZ
+cat > /tmp/_slideaway_beamer_smoke.tex << 'SMOKE'
+\documentclass{beamer}
+\usetheme{metropolis}
+\usepackage{tikz}
+\begin{document}
+\begin{frame}{Smoke Test}
+\begin{tikzpicture}\draw (0,0) -- (1,1);\end{tikzpicture}
+\end{frame}
+\end{document}
+SMOKE
+
+# Try tectonic first, fall back to pdflatex
+if command -v tectonic &>/dev/null; then
+  tectonic /tmp/_slideaway_beamer_smoke.tex -o /tmp/ 2>&1
+elif command -v pdflatex &>/dev/null; then
+  pdflatex -halt-on-error -interaction=nonstopmode -output-directory=/tmp /tmp/_slideaway_beamer_smoke.tex 2>&1
+else
+  echo 'ERROR: No TeX engine found. Install tectonic or texlive.'
+  exit 1
+fi
+
+# Check exit code
+if [ $? -eq 0 ]; then
+  echo 'BEAMER SMOKE TEST: PASS'
+else
+  echo 'BEAMER SMOKE TEST: FAIL'
+  echo 'Beamer engine is not usable. Suggestions:'
+  echo '  1. Install tectonic: conda install -c conda-forge tectonic'
+  echo '  2. Use Marp as alternative: /slides "topic" --engine marp --format pdf'
+  exit 1
+fi
+```
+
+**If smoke test fails**: the agent MUST suggest Marp (`--engine marp --format pdf`) as zero-dependency alternative and NOT proceed with Beamer generation. Do NOT generate 800 lines of LaTeX that will fail to compile.
 
 ### Beamer Gotchas
 

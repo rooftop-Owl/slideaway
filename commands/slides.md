@@ -10,7 +10,7 @@ source: slides
 
 Generate presentations, slide decks, and posters via a 7-engine armory. Default output: styled editable PPTX via python-pptx + SlideFactory.
 
-Delegates to **Hephaestus** with subdirectory skill `slide-generation` via `load_skills=["slide-generation"]`.
+Delegates to the orchestrating agent with subdirectory skill `slide-generation` via `load_skills=["slide-generation"]`.
 
 > **Default human path**: Just type `/slides "your topic"`. The conversational Phase 0 discovery handles everything — audience, style, narrative, outline — before any generation happens. Flags below are for programmatic or power-user use.
 
@@ -43,7 +43,7 @@ Delegates to **Hephaestus** with subdirectory skill `slide-generation` via `load
 | `--static` | false | For PPTX: use Marp image-based instead of editable |
 | `--template` | — | Path to `.pptx` template (for md2pptx or python-pptx) |
 | `--preview` | false | Generate 2-3 style previews before full deck (opt-in). Shows visual options for style selection. |
-| `--refine` | false | After generation, auto-inspect and fix issues (opt-in, max 2 iterations). Uses slide-qa agent. |
+| `--refine` | false | After generation, auto-inspect and fix issues (opt-in, max 3 rounds). Uses slide-qa agent. |
 | `--style <name>` | — | Use a specific style preset by name (e.g., --style executive-suite). Skips style selection. |
 | `--no-coach` | false | Skip Phase 0 discovery. Use provided flags directly for engine/style/duration. For agent-to-agent or power-user use. |
 
@@ -54,9 +54,9 @@ Four agents collaborate across the pipeline:
 | Agent | Phase | Role |
 |-------|-------|------|
 | **slide-coach** | Phase 0 — Discovery | Signal parsing, audience calibration, brief assembly, outline, approval gate |
-| **Hephaestus** | Phase 1–2 — Engine & Content | Engine resolution, content generation, engine conversion |
+| **Orchestrating agent** | Phase 1–2 — Engine & Content | Engine resolution, content generation, engine conversion |
 | **slide-reviewer** | Phase 3 — Content Review | Narrative coherence, slide-level feedback, content quality |
-| **slide-qa** | Phase 4 — Design Review | Visual QA, render inspection, PASS/FAIL verdicts (iterative, max 2 rounds) |
+| **slide-qa** | Phase 4 — Design Review | Visual QA, render inspection, PASS/ITERATE/HALT verdicts (iterative, max 3 rounds) |
 
 ## Theme Usage
 
@@ -140,7 +140,7 @@ User request
     │              offer fallback engine (e.g., md2pptx for template-first markdown,
     │              or Marp static if editable path unavailable)
     │
-    ├─[Phase 2]─► Content Creation (Hephaestus)
+    ├─[Phase 2]─► Content Creation (orchestrating agent + slide-generation skill)
     │              Generate presentation structure (outline → source content).
     │              Engine-specific format:
     │              - Marp/md2pptx: Marp-flavored or standard Markdown
@@ -163,8 +163,8 @@ User request
     │                (`python3 modules/slides/tools/validate_pptx.py output.pptx`)
     │              - For HTML: optionally screenshot via chrome-devtools
     │              - For PDF: check page count with pdfinfo
-    │              Visual QA: render, inspect, PASS/FAIL verdict.
-    │              If FAIL: fix issues and re-inspect (max 2 iterations).
+    │              Visual QA: render, inspect, PASS/ITERATE/HALT verdict.
+    │              If ITERATE: fix issues and re-inspect (max 3 rounds).
     │
     └─[Phase 5]─► Delivery
                    "✓ Generated 10-slide presentation
@@ -187,9 +187,10 @@ Without `--no-coach`, the default path is conversational: the slide-coach asks n
 
 ## Skill Required
 
-This command loads the subdirectory skill `slide-generation` into Hephaestus. The skill contains all engine-specific workflows, invocation patterns, and validation steps.
+This command loads the subdirectory skill `slide-generation` into the orchestrating agent. The skill contains all engine-specific workflows, invocation patterns, and validation steps.
 
-If `slides` module is not loaded, run:
+If the slideaway plugin is not installed, run:
 ```bash
-astraeus load slides
+/plugin marketplace add rooftop-Owl/slideaway
+/plugin install slideaway@slideaway-marketplace
 ```

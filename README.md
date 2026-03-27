@@ -68,7 +68,7 @@ Most presentation tools generate generic AI output. Slideaway enforces quality t
 | `--format` | `pptx` | `html`, `pdf`, `pptx`, `notebook`, `all` |
 | `--style <name>` | — | Named style preset (e.g., `executive-suite`). Skips style selection. |
 | `--preview` | false | Generate 2–3 style previews before full deck (opt-in) |
-| `--refine` | false | Auto-inspect and fix issues after generation (opt-in, max 2 iterations) |
+| `--refine` | false | Auto-inspect and fix issues after generation (opt-in, max 3 rounds). Uses slide-qa agent. |
 | `--from` | — | Source file: `.md`, `.tex`, `.pdf`, `.txt`, `.ipynb`. Files >50KB chunked. |
 | `--slides` | `10` | Target number of slides |
 | `--template` | — | Path to `.pptx` template (for md2pptx or python-pptx) |
@@ -97,8 +97,9 @@ Most presentation tools generate generic AI output. Slideaway enforces quality t
 slides/
 ├── README.md
 ├── agents/
-│   ├── slide-designer.md       # Presentation generation agent
-│   └── slide-qa.md             # Visual QA agent
+│   ├── slide-coach.md          # Phase 0 discovery & planning agent
+│   ├── slide-reviewer.md       # Phase 3 content review agent
+│   └── slide-qa.md             # Phase 4 visual QA agent
 ├── commands/
 │   └── slides.md               # /slides command definition
 │   ├── slide-generation/       # 7-engine workflows + 15 reference files

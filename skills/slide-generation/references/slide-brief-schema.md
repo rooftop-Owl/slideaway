@@ -1,6 +1,6 @@
 # Slide Brief Schema
 
-> **Scope**: This schema defines the contract between the planning agent (slide-coach) and all downstream pipeline stages (slide-creator, content-reviewer, design-reviewer). The Slide Brief is the single structured artifact that flows through the entire pipeline. Every field documented here is either required or explicitly optional. Downstream agents consume the brief — they do not modify it.
+> **Scope**: This schema defines the contract between the planning agent (slide-coach) and all downstream pipeline stages (slide-generation skill, slide-reviewer, slide-qa). The Slide Brief is the single structured artifact that flows through the entire pipeline. Every field documented here is either required or explicitly optional. Downstream agents consume the brief — they do not modify it.
 
 ---
 
@@ -171,7 +171,7 @@ Pipeline agents enforce these rules before processing a brief.
 
 This is non-negotiable. Every design choice, content decision, or structural judgment in the pipeline must trace back to a specific brief field. Examples:
 
-### slide-creator (Content Generation)
+### Content Generation (slide-generation skill)
 
 ```
 Per brief.structure.narrative_arc = "scr", structuring as:
@@ -184,7 +184,7 @@ Per brief.purpose.the_one_thing = "Coastal flood risk doubles by 2050 under SSP5
 placing this as the title slide subtitle AND the final slide takeaway.
 ```
 
-### content-reviewer (Content QA)
+### slide-reviewer (Content QA)
 
 ```
 Checking brief.purpose.the_one_thing appears on at least 2 slides (title + conclusion).
@@ -194,7 +194,7 @@ Checking brief.structure.time_blocks against actual slide count per section.
 WARN: Results section has 6 slides but brief allocates 4. Presenter will rush.
 ```
 
-### design-reviewer (Visual QA)
+### slide-qa (Visual QA)
 
 ```
 Per brief.style.preset = "research-clean", verifying:
@@ -388,21 +388,21 @@ slide-coach (producer)
     ├─ Emits the brief
     │
     ▼
-slide-creator (consumer)
+Content generation / slide-generation skill (consumer)
     │
     ├─ Reads brief, quotes fields for every decision
     ├─ Generates slides per structure.time_blocks
     ├─ Applies style.preset + style.engine
     │
     ▼
-content-reviewer (consumer)
+slide-reviewer (consumer)
     │
     ├─ Checks slides against brief.purpose and brief.audience
     ├─ Verifies the_one_thing appears prominently
     ├─ Validates section timing against time_blocks
     │
     ▼
-design-reviewer (consumer)
+slide-qa (consumer)
     │
     ├─ Checks visual compliance against brief.style
     ├─ Enforces brief.constraints.accessibility

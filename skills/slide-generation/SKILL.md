@@ -25,7 +25,7 @@ Phase 0: Discovery (MANDATORY — slide-coach)
 Phase 1: Engine resolution (auto from brief — never shown to user)
   1.5. Optional style preview gate (--preview)
 
-Phase 2: Content creation (Hephaestus + slide-generation skill)
+Phase 2: Content creation (orchestrating agent + slide-generation skill)
 
 Phase 3: Content review (slide-reviewer → fix if REVISE)
 
@@ -240,7 +240,7 @@ Include at least:
 
 Example:
 
-"astraeus"\n"Adaptive AI agent orchestration"\n"Sisyphus team"\n"2026-02-23"
+"Project Name"\n"Subtitle or tagline"\n"Author / Team"\n"2026-02-23"
 
 ### Visual Hierarchy
 
@@ -440,7 +440,7 @@ task(
 
 ### Verdict Handling
 - **PASS** → proceed to Phase 4 (design review)
-- **REVISE** → apply revision instructions, regenerate affected slides, re-run Phase 3 (max 2 iterations)
+- **REVISE** → apply revision instructions, regenerate affected slides, re-run Phase 3 (max 3 iterations)
 
 ---
 
@@ -514,8 +514,8 @@ After full generation:
 1. Render all slides to images (use visual QA skill Path A or Path B).
 2. Inspect rendered output against `references/design-principles.md` Section J.11 checklist plus anti-slop heuristics.
 3. If issues are found, fix only affected slides and regenerate output.
-4. Re-render and re-inspect after fixes; allow **max 2 iterations** total.
-5. Report final QA verdict as PASS or FAIL with concrete issue details.
+4. Re-render and re-inspect after fixes; allow **max 3 rounds** total.
+5. Report final QA verdict as PASS, ITERATE, or HALT with concrete issue details.
 
 Verification separation (required):
 - Producer ≠ verifier.

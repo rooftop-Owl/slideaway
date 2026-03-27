@@ -2,7 +2,7 @@
 
 > 30 named styles synthesized from community design systems.
 > Each style includes color palette, typography, layout principles, and usage guidance.
-> Source: Adapted from corazzon/pptx-design-styles and astraeus design conventions.
+> Source: Adapted from corazzon/pptx-design-styles and slideaway design conventions.
 
 ---
 

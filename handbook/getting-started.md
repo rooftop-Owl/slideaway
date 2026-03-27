@@ -48,10 +48,11 @@ This unlocks the default engine (python-pptx) and md2pptx.
 
 ## Quick Start
 
-### Load the module
+### Install the plugin
 
 ```bash
-astraeus load slides --target ~/my-project
+/plugin marketplace add rooftop-Owl/slideaway
+/plugin install slideaway@slideaway-marketplace
 ```
 
 This adds the `/slides` command and `slide-generation` skill to your project.

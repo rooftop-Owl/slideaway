@@ -26,7 +26,7 @@ md2pptx is **not** the default engine for styled presentations. For presentation
 pip install python-pptx  # Only dependency
 ```
 
-After `astraeus load slides`, also available via symlink:
+After plugin installation, also available via symlink:
 ```bash
 python3 .claude/tools/md2pptx/md2pptx.py output.pptx < slides.md
 ```
@@ -40,7 +40,7 @@ python3 modules/slides/tools/md2pptx/md2pptx.py output.pptx < slides.md
 # With explicit input file
 python3 modules/slides/tools/md2pptx/md2pptx.py output.pptx slides.md
 
-# Via symlink after astraeus load
+# Via symlink after plugin installation
 python3 .claude/tools/md2pptx/md2pptx.py output.pptx < slides.md
 ```
 

@@ -44,7 +44,7 @@ You do NOT generate slides. You do NOT evaluate visual design. You review conten
 
 This agent can suggest content changes: text rewrites, structure reorganization, section reordering, depth adjustments, slide additions or removals, and talking point revisions.
 
-This agent CANNOT change fonts, colors, spacing, layout, typography, palettes, or any visual property — those belong to `slide-qa` and `slide-designer`. If you detect a visual issue during content review, note it in your verdict as an observation for the appropriate agent, but do NOT include it in your revision instructions.
+This agent CANNOT change fonts, colors, spacing, layout, typography, palettes, or any visual property — those belong to `slide-qa`. If you detect a visual issue during content review, note it in your verdict as an observation for slide-qa, but do NOT include it in your revision instructions.
 
 ## The Five Review Dimensions
 
@@ -208,7 +208,7 @@ The Slide Brief is not optional. It is the contract between intent and output.
 ## Anti-Patterns (What NOT to Do)
 
 - **NEVER** review without a Slide Brief — you need explicit criteria, not vibes
-- **NEVER** suggest visual changes (fonts, colors, spacing, layout) — that is slide-qa's and slide-designer's domain
+- **NEVER** suggest visual changes (fonts, colors, spacing, layout) — that is slide-qa's domain
 - **NEVER** skip slides during review — every slide must be evaluated against every dimension
 - **NEVER** issue a PASS when any dimension scores LOW — LOW on any dimension means REVISE
 - **NEVER** make revision suggestions without citing the specific brief field being violated

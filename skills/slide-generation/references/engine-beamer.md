@@ -76,6 +76,104 @@ Beamer is the gold standard for academic conference talks. Full LaTeX power: equ
 \end{document}
 ```
 
+### Known-Good Preambles (USE VERBATIM)
+
+Each Beamer template has a tested, minimal preamble. The generator MUST use these verbatim — never invent custom `\setbeamertemplate` overrides. Style customization is done exclusively via `\setbeamercolor` and `\definecolor`.
+
+**Rule**: Theme handles structure. Colors handle branding. Never mix the two.
+
+#### Metropolis (default)
+
+```latex
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{metropolis}
+% Style: color overrides ONLY
+\definecolor{BrandPrimary}{HTML}{2C3E6B}
+\definecolor{BrandAccent}{HTML}{E74C3C}
+\setbeamercolor{frametitle}{bg=BrandPrimary, fg=white}
+\setbeamercolor{progress bar}{fg=BrandPrimary}
+\setbeamercolor{alerted text}{fg=BrandAccent}
+\setbeamertemplate{navigation symbols}{}
+% TikZ (safe with metropolis)
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+```
+
+#### Conference (Madrid/beaver)
+
+```latex
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{Madrid}
+\usecolortheme{beaver}
+% Style: color overrides ONLY
+\definecolor{BrandPrimary}{HTML}{8B0000}
+\setbeamercolor{structure}{fg=BrandPrimary}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+% TikZ (safe with Madrid)
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+```
+
+#### Seminar (Madrid/dolphin)
+
+```latex
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+% Style: color overrides ONLY
+\definecolor{BrandPrimary}{HTML}{1A5276}
+\setbeamercolor{structure}{fg=BrandPrimary}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+% Section dividers (safe — uses built-in template, not custom)
+\AtBeginSection[]{
+  \begin{frame}
+    \vfill\centering
+    \usebeamerfont{title}\insertsectionhead\par
+    \vfill
+  \end{frame}
+}
+% TikZ (safe with Madrid)
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+```
+
+#### Defense (Boadilla/whale)
+
+```latex
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{Boadilla}
+\usecolortheme{whale}
+% Style: color overrides ONLY
+\definecolor{BrandPrimary}{HTML}{1B2A4A}
+\setbeamercolor{structure}{fg=BrandPrimary}
+\setbeamertemplate{navigation symbols}{}
+% Frame number footline (safe — uses built-in mechanism)
+\setbeamertemplate{footline}{
+  \hfill\insertframenumber{}/\inserttotalframenumber\hspace*{2ex}\vskip2pt
+}
+% Section dividers
+\AtBeginSection[]{
+  \begin{frame}
+    \vfill\centering
+    \usebeamerfont{title}\insertsectionhead\par
+    \vfill
+  \end{frame}
+}
+% TikZ (safe with Boadilla)
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+```
+
+#### Adapting Colors for a Style Preset
+
+To apply a slideaway style preset (#16, #17, etc.) to Beamer:
+1. Look up the preset's `primary`, `accent`, and `text` hex values from `presentation-design-styles/references/styles.md`
+2. `\definecolor{BrandPrimary}{HTML}{...}` with the preset's primary color
+3. `\definecolor{BrandAccent}{HTML}{...}` with the preset's accent color
+4. Apply via `\setbeamercolor` — NEVER via `\setbeamertemplate`
+5. Do NOT set `background canvas` or `normal text` bg colors — let the theme handle backgrounds
 ### Compilation
 
 **Preferred: `tectonic`** (auto-downloads packages, no TikZ version issues):

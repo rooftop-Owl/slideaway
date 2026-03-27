@@ -22,6 +22,8 @@ Phase 0: Discovery (MANDATORY — slide-coach)
   0e. Outline generation + approval gate
   HARD GATE: no Phase 1 until brief + outline approved
 
+Phase 0.1: Environment gate (MANDATORY — verify engine deps work)
+
 Phase 1: Engine resolution (auto from brief — never shown to user)
   1.5. Optional style preview gate (--preview)
 
@@ -30,6 +32,9 @@ Phase 2: Content creation (orchestrating agent + slide-generation skill)
 Phase 3: Content review (slide-reviewer → fix if REVISE)
 
 Phase 4: Design review (slide-qa → iterative loop, max 3 rounds)
+
+Phase 4.5: Post-generation compile check (HARD GATE — compilable engines only)
+  HARD GATE: no Phase 5 (delivery) until compile succeeds or failure reported honestly
 
 Phase 5: Delivery report
 ```
@@ -74,6 +79,11 @@ When generating with a specific engine, you MUST read the corresponding referenc
 - `../presentation-visual-qa/references/visual-qa-automation.md` — rendering paths, PIL automation scripts, issue log, stopping criteria
 - `../presentation-visual-qa/references/delivery-intelligence.md` — slide design for delivery support
 - Before delivery → read `references/validation-patterns.md`
+
+### Phase 4.5 — Compile Check
+- Applies only to compilable engines: Beamer (`.tex`), Marp (`.md`)
+- ALWAYS load `references/engine-beamer.md` during Phase 4.5 for Beamer — the anti-patterns and known-good preambles are required for auto-fix
+- PPTX engines (python-pptx, md2pptx): no compile step — `validate_pptx.py` in Phase 4 already covers structural validation
 
 ### Legacy Rules (still apply)
 - Evaluating whether slides support delivery (opening/closing/transitions/Q&A) → delegate to `slide-qa` agent with `../presentation-visual-qa/references/delivery-intelligence.md`
@@ -477,25 +487,70 @@ task(
 
 After content review passes, delegate to the **slide-qa** agent for visual quality assurance. This is an iterative loop with convergence guardrails.
 
-### Compilation Gate (MANDATORY before visual QA)
+### Phase 4.5 — Post-Generation Compile Check (HARD GATE)
 
-For engines that produce compilable source files (Beamer `.tex`, Marp `.md`), **compile the output and check the exit code BEFORE proceeding to visual inspection**. If compilation fails:
+For engines that produce compilable source files (Beamer `.tex`, Marp `.md`), **compile the generated output and check the exit code BEFORE visual inspection or delivery**. If compilation fails, do NOT claim success — report the failure honestly with the raw error.
 
-1. Check for Beamer anti-patterns (see `references/engine-beamer.md` → Anti-Patterns section)
-2. Fix the preamble (usually by removing custom `\setbeamertemplate` overrides)
-3. Recompile (max 2 fix attempts)
-4. If still broken, report the compilation error to the user — do NOT claim validation passed
+> **Why**: Phase 0.1 verifies the TeX environment compiles *anything*. Phase 4.5 verifies *this specific output* compiles. They are complementary, not redundant. A correct environment with a broken preamble will pass Phase 0.1 and fail Phase 4.5.
+
+#### Compile Commands
 
 ```bash
-# Beamer: compile and check exit code
-tectonic slides.tex  # preferred (auto-downloads packages)
-# fallback: pdflatex -halt-on-error -interaction=nonstopmode slides.tex
+# Beamer (.tex) — preferred engine
+tectonic slides.tex
 
-# Marp: compile and check exit code
+# Beamer (.tex) — fallback if tectonic unavailable
+pdflatex -halt-on-error -interaction=nonstopmode slides.tex
+
+# Marp (.md)
 npx @marp-team/marp-cli slides.md --html --allow-local-files
 ```
 
-> **The `--refine` flag and visual QA are useless if the source doesn't compile.** Compilation gate MUST precede visual inspection.
+#### Auto-Fix Retry Loop (max 2 attempts)
+
+If compilation fails:
+
+1. **Parse the error log** — classify the failure:
+
+| Error Pattern | Likely Cause | Auto-Fix Strategy |
+|---------------|-------------|-------------------|
+| `\tikzscope@linewidth undefined` | PGF scope corruption | Remove `\setbeamertemplate` overrides; use known-good preamble |
+| `File '*.sty' not found` | Missing package | Add `\usepackage{pkg}` or switch to known-good preamble |
+| `Undefined control sequence \setbeamertemplate` | Anti-pattern in preamble | Replace with `\setbeamercolor` equivalent |
+| `Emergency stop` / `Fatal error` | Preamble syntax error | Revert to known-good preamble verbatim |
+| Font not found | Missing font package | Replace with standard LaTeX font |
+
+2. **Apply fix** — for known error patterns:
+   - Replace broken preamble section with the corresponding known-good preamble from `references/engine-beamer.md`
+   - Do NOT invent new template overrides — always fall back to a known-good preamble
+   
+3. **Recompile** — check exit code again
+
+4. **Repeat** up to 2 total fix attempts (3 total compile attempts: original + fix 1 + fix 2)
+
+#### HALT Path (honest failure reporting)
+
+If all attempts fail, **DO NOT** claim the output is valid. Report honestly:
+
+```
+Phase 4.5 — Compilation FAILED after 2 fix attempts.
+
+Engine: tectonic
+Error (last attempt): [paste the relevant error lines — max 10 lines]
+
+Deliverables:
+  ✅ slides.tex — source file (uncompiled)
+  ❌ slides.pdf — not generated
+
+Recommended next steps:
+  1. Inspect slides.tex preamble — compare against known-good preamble in engine-beamer.md
+  2. Run manually: tectonic slides.tex
+  3. Share the error output to debug further
+```
+
+**Never**: claim `validation passed`, `slides generated`, or report a success summary when the output did not compile.
+
+> **The `--refine` flag and visual QA are meaningless if the source doesn't compile.** Phase 4.5 is the gate that makes Phase 4 visual QA trustworthy.
 
 ### Explicit validate_pptx.py Call (MANDATORY)
 

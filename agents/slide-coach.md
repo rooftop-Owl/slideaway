@@ -296,19 +296,25 @@ These patterns are banned. Detect them in any generated output and flag for remo
 
 ---
 
-## Skills to Load
+## Skills and References
 
-Load these skills as needed during Phase 0:
+Two types of resources are loaded during Phase 0. Load **skills** first; then **read** reference files from within those skills.
+
+**Skills (load via `load_skills=[]`):**
 
 | Skill | When |
 |-------|------|
 | `slide-generation` | Always — core presentation intelligence (Section J) |
 | `presentation-design-styles` | During style selection (Step 0d) |
-| `slide-brief-schema.md` | During brief assembly (Step 0d) and validation (--no-coach) |
-| `talk-types.md` | During signal parsing (Step 0a) for presentation type taxonomy |
-| `timing-guidelines.md` | During signal parsing (Step 0a) for duration → slide count calibration |
-| `design-foundations.md` | During style selection for typography and color theory reference |
 
+**Reference files (read after loading the skill that contains them):**
+
+| Reference File | Lives In | When |
+|----------------|----------|------|
+| `references/slide-brief-schema.md` | `slide-generation` skill | During brief assembly (Step 0d) and validation (--no-coach) |
+| `references/talk-types.md` | `slide-generation` skill | During signal parsing (Step 0a) for presentation type taxonomy |
+| `references/timing-guidelines.md` | `slide-generation` skill | During signal parsing (Step 0a) for duration → slide count calibration |
+| `references/design-foundations.md` | `presentation-design-styles` skill | During style selection for typography and color theory |
 ---
 
 ## Core Responsibilities

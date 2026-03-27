@@ -78,6 +78,13 @@ Beamer is the gold standard for academic conference talks. Full LaTeX power: equ
 
 ### Compilation
 
+**Preferred: `tectonic`** (auto-downloads packages, no TikZ version issues):
+```bash
+# Single command — handles all passes, bibliography, and package downloads
+tectonic slides.tex
+```
+
+**Fallback: `pdflatex`** (requires full TeX Live installation):
 ```bash
 # Standard (two passes for references)
 pdflatex slides.tex && pdflatex slides.tex
@@ -89,6 +96,14 @@ xelatex slides.tex
 pdflatex slides.tex && bibtex slides && pdflatex slides.tex && pdflatex slides.tex
 ```
 
+### Known Issue: conda texlive-core + TikZ
+
+> **`\tikzscope@linewidth` undefined** — conda's `texlive-core` package ships a minimal TeX distribution that lacks TikZ/PGF scope internals required by Beamer themes (Madrid, Boadilla, etc.). The format file (`pdflatex.fmt`) may also fail to generate.
+>
+> **Fix**: Use `tectonic` instead (auto-downloads missing packages on first run), or install a full TeX Live via system package manager (`apt install texlive-full`).
+>
+> **Do NOT** attempt to fix by downgrading Beamer themes — the issue is in the TeX distribution, not the templates.
+
 ### Beamer Gotchas
 
 | Pattern | Why | What Happens Otherwise |
@@ -99,6 +114,7 @@ pdflatex slides.tex && bibtex slides && pdflatex slides.tex && pdflatex slides.t
 | PDF figures only | Vector graphics scale | Pixelated on projector |
 | `\note{}` for speaker notes | Separate content from delivery | Notes mixed with slides |
 | `xelatex` for Unicode | Handles non-ASCII | Encoding errors with pdflatex |
+| `tectonic` for conda envs | Auto-downloads missing packages | `\tikzscope@linewidth` undefined |
 
 ### Useful Environments
 

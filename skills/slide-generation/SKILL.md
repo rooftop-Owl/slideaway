@@ -182,12 +182,12 @@ When `--no-coach` is present, skip Phase 0 entirely. This is the legacy v2.0/v2.
 | Fill an existing corporate template from Markdown | md2pptx | `python3 modules/slides/tools/md2pptx/md2pptx.py output.pptx < slides.md` |
 | Data-driven slides | python-pptx + SlideFactory | Python script with SlideFactory |
 | Interactive web | reveal.js | `pandoc -t revealjs -s --embed-resources` |
-| Academic conference | Beamer | `pdflatex slides.tex` |
+| Academic conference | Beamer | `tectonic slides.tex` (preferred) or `pdflatex slides.tex` |
 | Full design control | Standalone HTML | Individual HTML files |
 | Live code demo | RISE/Jupyter | Jupyter + RISE extension |
 | Modern PDF handout | Marp | `marp slides.md --pdf` |
 | Corporate template with exact positioning | python-pptx + SlideFactory | Template-based Python script |
-| Academic poster | tikzposter | `pdflatex poster.tex` |
+| Academic poster | tikzposter | `tectonic poster.tex` (preferred) or `pdflatex poster.tex` |
 
 ### Engine Resolution (no --engine flag)
 

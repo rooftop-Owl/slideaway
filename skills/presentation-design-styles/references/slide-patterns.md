@@ -1,7 +1,8 @@
 # Slide Design Methodology
 
 > A 5-step framework for creating effective, visually coherent presentation slides.
-> Adapted from visual communication principles for agent-assisted slide generation.
+> Adapted from visual communication principles (Duarte 2008, Tufte 1983) for agent-assisted
+> slide generation. Full provenance: [REFERENCES.md](../../../../REFERENCES.md).
 
 ---
 

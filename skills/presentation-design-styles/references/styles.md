@@ -2,7 +2,8 @@
 
 > 30 named styles synthesized from community design systems.
 > Each style includes color palette, typography, layout principles, and usage guidance.
-> Source: Adapted from corazzon/pptx-design-styles and slideaway design conventions.
+> Source: Adapted from [corazzon/pptx-design-styles](https://github.com/corazzon/pptx-design-styles)
+> and slideaway design conventions. Full provenance: [REFERENCES.md](../../../../REFERENCES.md).
 
 ---
 

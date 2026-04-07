@@ -301,14 +301,19 @@ All dependencies are optional — engines degrade gracefully with install guidan
 
 ## Inspired By
 
-Slideaway's multi-agent architecture draws from recent advances in automated presentation generation:
+Slideaway's multi-agent architecture draws from recent advances in automated presentation generation.
+**Full provenance with adoption depth, pending items, and tracking dates: [REFERENCES.md](REFERENCES.md)**.
 
 | System | Key Insight | Reference |
 |--------|-------------|-----------|
-| **PaperBanana** | 5-agent pipeline (analyst → planner → writer → designer → reviewer) proves multi-agent outperforms single-agent for slide generation | Zheng et al. (2025), Google Research / PKU |
-| **SlideBot** | Cognitive Load Theory (CLT) as a design constraint — measuring intrinsic, extraneous, and germane load per slide | Sarkar et al. (EAAI 2026) |
+| **PaperBanana** | 5-agent pipeline (analyst → planner → writer → designer → reviewer) proves multi-agent outperforms single-agent for slide generation | [llmsresearch/paperbanana](https://github.com/llmsresearch/paperbanana) |
+| **SlideBot** | Cognitive Load Theory (CLT) + CTML as design constraints — managing intrinsic, extraneous, and germane load per slide | Xie et al. (EAAI 2026) — [arXiv:2511.09804](https://arxiv.org/abs/2511.09804) |
 | **SlideGen** | Collaborative multimodal generation — LLM + diffusion model + layout optimizer working in concert | Wu et al. (2025) |
-| **PPTAgent** | Generation + evaluation as dual concerns — separate agents for creating vs. judging slide quality | Li et al. (2025) |
+| **PPTAgent** | Generation + evaluation as dual concerns — PPTEval framework (Content, Design, Coherence) | Zheng et al. (EMNLP 2025) — [arXiv:2501.03936](https://arxiv.org/abs/2501.03936) |
+| **PPTArena** | Benchmark for agentic PowerPoint editing — edit-in-place workflows | Gandhi et al. (ICLR 2026 under review) — [arXiv:2512.03042](https://arxiv.org/abs/2512.03042) |
+| **corazzon/pptx-design-styles** | 30 design style presets with structured palettes and typography | [corazzon/pptx-design-styles](https://github.com/corazzon/pptx-design-styles) |
+
+Design theory: Duarte (2008, 2010), Minto (1987), Sweller (1988), Mayer (2009), Tufte (1983). See [REFERENCES.md](REFERENCES.md) for details.
 
 Slideaway adapts these patterns for the Claude Code plugin ecosystem: agents are skills + system prompts (not fine-tuned models), the pipeline is flag-driven (not API-driven), and quality gates are iterative (up to 3 rounds, not single-pass).
 

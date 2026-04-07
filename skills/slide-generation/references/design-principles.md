@@ -3,6 +3,10 @@
 <!-- Modularization note: If Section J exceeds ~250 lines, extract to standalone
      presentation-intelligence.md skill. See impact.md for growth path. -->
 
+> **Sources**: Audience model (J.2) from Duarte (2010); narrative structures (J.3) from Duarte (2010)
+> and Minto (1987); assertion-evidence (J.10) from Alley & Neeley (2005); volume calibration (J.4)
+> from presentation practitioner consensus. Full provenance: [REFERENCES.md](../../../../REFERENCES.md).
+
 These principles apply to all 7 engines. Agent selects appropriate framework based on purpose (J.1), audience (J.2), and domain (J.8).
 
 ### Design Intelligence

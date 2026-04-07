@@ -128,7 +128,43 @@ Visual identity and rendering engine.
 
 ---
 
-### 5. Constraints (Optional)
+### 5. Delivery
+
+How the presentation will reach the audience. This determines engine selection in Phase 1.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `delivery.medium` | enum | **yes** | How the presenter will deliver: `present-live`, `share-file`, `embed-web`, `print-handout` |
+| `delivery.editable` | boolean | no | Does the user need to edit the output after generation? Defaults: `true` for `share-file`, `false` for others. |
+| `delivery.format_preference` | enum | no | Explicit user override: `pptx`, `pdf`, `html`, `notebook`. If set, engine resolution uses this directly. |
+
+**Medium definitions:**
+
+| Medium | Meaning | Default Engine | Rationale |
+|--------|---------|----------------|-----------|
+| `present-live` | Presenter shows slides from their own machine | `pptx` (python-pptx) | Most projectors/rooms expect PPTX or PDF; editable by default |
+| `share-file` | Deck is emailed, uploaded, or shared for others to read/edit | `pptx` (python-pptx) | Recipients need to open and possibly edit; PPTX is universal |
+| `embed-web` | Slides are embedded on a website or shared as a URL | `html` (Marp or reveal.js) | Web-native format; interactive option available |
+| `print-handout` | Deck is printed or exported as a static PDF | `pdf` (Marp or Beamer) | Optimized for paper; no animations or interactive elements |
+
+**Engine resolution from delivery fields:**
+
+Phase 1 uses `delivery.medium` + `delivery.editable` + `delivery.format_preference` (if set) to select the engine. If `delivery.format_preference` is set, it takes precedence. Otherwise:
+
+```
+present-live + editable     → python-pptx (styled PPTX)
+present-live + not editable → Marp PDF
+share-file + editable       → python-pptx (styled PPTX)
+share-file + not editable   → Marp PDF
+embed-web                   → Marp HTML (default) or reveal.js (if --interactive)
+embed-web + academic        → Beamer PDF (conference upload)
+print-handout               → Marp PDF or Beamer PDF (if academic)
+```
+
+**Why this exists**: Format choice is deeply consequential for the user — a researcher presenting at a conference needs Beamer PDF, a team lead sharing a deck needs editable PPTX, someone embedding on a wiki needs HTML. Previously, engine selection happened silently in Phase 1 with no user input. Now the coach captures delivery intent during Phase 0 and records it in the brief, giving the user visibility and control.
+---
+
+### 6. Constraints (Optional)
 
 Situational requirements that override defaults.
 
@@ -251,8 +287,13 @@ structure:
 
 style:
   preset: "research-clean"
-  engine: "marp"
+  engine: "marp"  # resolved from delivery.medium + academic context
   anti_slop_verified: true
+
+delivery:
+  medium: "present-live"
+  editable: false
+  # Conference talk — presenter shows PDF from their laptop
 
 constraints:
   language: "en"
@@ -308,9 +349,15 @@ structure:
 
 style:
   preset: "academic-formal"
-  engine: "beamer"
+  engine: "beamer"  # resolved from delivery.format_preference override
   template: "templates/beamer/defense.tex"
   anti_slop_verified: true
+
+delivery:
+  medium: "present-live"
+  editable: true
+  format_preference: "pptx"
+  # Defense — needs editable PPTX for last-minute committee feedback
 
 constraints:
   accessibility:
@@ -366,8 +413,13 @@ structure:
 
 style:
   preset: "minimalist"
-  engine: "marp"
+  engine: "marp"  # resolved from delivery.medium = share-file, editable = false
   anti_slop_verified: true
+
+delivery:
+  medium: "share-file"
+  editable: false
+  # Internal retro — shared via Slack, nobody edits it
 
 constraints:
   language: "en"

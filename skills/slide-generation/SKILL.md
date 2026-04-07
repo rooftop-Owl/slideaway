@@ -228,14 +228,34 @@ Without this check, the pipeline generates hundreds of lines of engine-specific 
 | Corporate template with exact positioning | python-pptx + SlideFactory | Template-based Python script |
 | Academic poster | tikzposter | `tectonic poster.tex` (preferred) or `pdflatex poster.tex` |
 
-### Engine Resolution (no --engine flag)
+### Engine Resolution
 
-When the user doesn't specify an engine, resolve by format flag.
+Engine resolution uses three inputs, checked in priority order:
 
-Apply this gate before selecting editable PPTX engine:
+1. **`delivery.format_preference`** (from Slide Brief) — if set, use this format directly
+2. **`delivery.medium` + `delivery.editable`** (from Slide Brief) — map to engine via delivery table
+3. **`--engine` / `--format` flags** (from command line) — legacy path, bypasses brief
+4. **Goal-based heuristic** (fallback) — infer from context
 
-1. If the user needs presentation-ready styling (16:9 ratio, explicit fonts, title/subtitle/author separation, header bars, slide numbering, bold-prefix bullets), use **python-pptx + SlideFactory**.
-2. If the user explicitly wants template-first Markdown import with minimal styling control, use **md2pptx**.
+#### Delivery-Based Resolution (Primary Path — Phase 0 captures this)
+
+When the Slide Brief includes `delivery.medium` (which it always should after Phase 0), resolve as:
+
+| `delivery.medium` | `delivery.editable` | Engine | Output |
+|-------------------|---------------------|--------|--------|
+| `present-live` | `true` (default) | python-pptx + SlideFactory | Editable PPTX |
+| `present-live` | `false` | Marp | PDF |
+| `present-live` + `--academic` | any | Beamer | PDF (LaTeX) |
+| `share-file` | `true` (default) | python-pptx + SlideFactory | Editable PPTX |
+| `share-file` | `false` | Marp | PDF |
+| `embed-web` | n/a | Marp HTML | Single-file HTML |
+| `embed-web` + `--interactive` | n/a | reveal.js | Interactive HTML |
+| `print-handout` | n/a | Marp | PDF |
+| `print-handout` + `--academic` | n/a | Beamer | PDF (LaTeX) |
+
+#### Flag-Based Resolution (Legacy / `--no-coach` Path)
+
+When no Slide Brief `delivery` section exists (e.g., `--no-coach` with explicit flags), resolve by flag:
 
 | Flag | Engine | Rationale |
 |------|--------|-----------|
@@ -247,7 +267,12 @@ Apply this gate before selecting editable PPTX engine:
 | `--format pdf` | Marp | PDF from Markdown, no LaTeX needed |
 | `--format pdf --academic` | Beamer | Full LaTeX control, citations |
 | `--format notebook` | RISE | Live code in slides |
-| No format | python-pptx + SlideFactory | Default editable PPTX with production-ready styling |
+| No format, no delivery | python-pptx + SlideFactory | Default editable PPTX with production-ready styling |
+
+Apply this gate before selecting editable PPTX engine:
+
+1. If the user needs presentation-ready styling (16:9 ratio, explicit fonts, title/subtitle/author separation, header bars, slide numbering, bold-prefix bullets), use **python-pptx + SlideFactory**.
+2. If the user explicitly wants template-first Markdown import with minimal styling control, use **md2pptx**.
 
 **Default rule**: When in doubt, produce editable PPTX via python-pptx with SlideFactory.
 

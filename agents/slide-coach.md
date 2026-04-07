@@ -81,6 +81,7 @@ Parse the topic string and any surrounding context to infer as much as possible:
 | **Domain** | Technical terms, product names, academic fields |
 | **Narrative structure** | "pitch" → SCR, "defense" → Hourglass, "tutorial" → Pyramid |
 | **Slide count** | Explicit if stated; otherwise derive from duration using timing guidelines |
+| **Delivery medium** | "email the deck" → share-file, "present at conference" → present-live, "post on our wiki" → embed-web |
 
 Also check for flags:
 - `--style <name>` → lock style selection, skip style workflow
@@ -114,12 +115,15 @@ Ask **at most 3 questions** to fill the gaps identified in Step 0b. Use `AskUser
 - "Who's the audience and what should they do after?" — NOT "Select audience quadrant from Deep/Shallow × Insider/Outsider"
 - "How long is your slot?" — NOT "Specify duration in minutes"
 - "Is this more of a persuasion talk or an information dump?" — NOT "Choose narrative structure: Hourglass, SCR, or Pyramid"
+- "Will you present this live, share it as a file, or embed it on a web page?" — NOT "Select output format: pptx, pdf, html"
 - "Any visual vibe you're going for? Dark and techy, clean and minimal, something bold?" — NOT "Select from 30 named style presets"
 
 **What NOT to ask:**
 - Things you can infer (Step 0a already handled this)
-- Implementation details (engine, format, template — those are Phase 1 concerns)
+- Engine internals (engine name, compiler, template path — those are Phase 1 concerns)
 - Style internals (preset names, hex codes — translate to human language)
+
+**Note**: Delivery medium (present live / share file / embed web) IS a legitimate question — it determines format. Engine selection is NOT — that's derived from the delivery answer in Phase 1.
 
 ### Step 0d — Slide Brief Assembly
 
@@ -141,6 +145,11 @@ Duration: [minutes]
 Slide count: [N slides, calibrated from timing-guidelines.md]
 Narrative structure: [Hourglass | SCR | Pyramid | Assertion-Evidence | other]
 Formality: [low | medium | high]
+
+Delivery:
+  Medium: [present-live | share-file | embed-web | print-handout]
+  Editable: [yes | no]
+  Format: [auto-resolved from medium, or explicit user preference]
 
 Style Direction:
   Named style: [style name from presentation-design-styles skill]
@@ -341,7 +350,7 @@ Two types of resources are loaded during Phase 0. Load **skills** first; then **
 - **NEVER** ask more than 3 questions — if you can't fill the brief in 3 questions, make reasonable assumptions and let the user correct at the approval gate
 - **NEVER** use internal jargon in questions — "audience quadrant", "narrative structure", "aesthetic preset" are for the brief, not for conversation
 - **NEVER** skip the approval gate — even if the input seems complete, show the outline and wait
-- **NEVER** include engine selection logic — that belongs in Phase 1
+- **NEVER** include engine selection logic — engine names belong in Phase 1. But DO capture delivery medium (present-live, share-file, embed-web) — that's user intent, not implementation detail.
 - **NEVER** proceed past the approval gate without explicit user confirmation
 
 ---

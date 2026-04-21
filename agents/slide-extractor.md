@@ -52,6 +52,9 @@ List all images in the input directory, sort numerically by filename, confirm co
 ls slides_images/*.png | sort -V | wc -l
 ```
 
+**Stop condition**: if the image count is 0, write no output files and report:
+`slide-extractor: no images found in [directory] — cannot extract`. Exit immediately.
+
 Do not skip slides. Every image must be classified.
 
 ### Step 2 — Classify Layout Roles
@@ -96,7 +99,9 @@ This description is what a regenerating agent would need to reproduce the visual
 
 ### Step 5 — Infer Deck-Level Properties
 
-Examine slides 1–3 and any section breaks. Infer:
+Examine slides 1–3 and any section breaks. For decks with fewer than 3 slides, use all available slides; note reduced inference confidence in the outline preamble.
+
+Infer:
 
 **Style family** (one of): academic / corporate / creative / minimal / technical / unknown
 
@@ -123,7 +128,7 @@ Evidence to use:
 - Single strong claim with supporting data → `pitch`
 - Cannot infer → `internal` (safe default)
 
-**Duration** — cannot be inferred from images. Use `"INFERRED:UNKNOWN"`.
+**Duration** — cannot be inferred from images. Compute in Step 6 as `slide_count × 1.5 min/slide` and populate `duration_minutes` accordingly. Surface the computed value as an estimate requiring human confirmation at 0f.
 
 **Ask** — infer from closing slide:
 - CTA visible (e.g., "Get started", "Sign up", "Contact us") → `adopt`
@@ -140,7 +145,8 @@ Populate the `slide-brief/1.0` schema. Rules:
 - `style.anti_slop_verified`: always `false` — the extracted brief has not been reviewed by slide-coach; the approval gate (0f) is where the human confirms the style choice passes anti-slop checks
 - `style.engine`: use the `--engine` hint if provided; otherwise `"pptx"` as default
 - `style.preset`: use the `--style` hint if provided; otherwise derive from the inferred style family (see mapping below)
-- Fields that cannot be inferred: populate with `"INFERRED:UNKNOWN"` for string fields, `0` for numeric fields, and surface them explicitly in the outline's preamble so the approval gate surfaces them to the user
+- Fields that cannot be inferred: use `"INFERRED:UNKNOWN"` only for **free-text string fields** (e.g. `audience.current_state`, `audience.desired_state`, `purpose.the_one_thing`). Enum fields must use a **safe default from the allowed values** — never write `"INFERRED:UNKNOWN"` for an enum (it will fail schema validation). Safe defaults: `quadrant→"shallow-outsider"`, `attention_budget→"medium"`, `the_ask→"none"`, `medium→"present-live"`, `narrative_arc→"hourglass"`, `talk_type→"internal"`. Surface all inferred-with-low-confidence fields in the outline preamble.
+- `duration_minutes`: compute from time_blocks — sum all `minutes` values across the assembled blocks (slide_count × 1.5 min/slide as the base rate). Do not write `0`; a non-zero computed value lets F5 validate correctly. Write `0` only if slide_count itself is unknown.
 
 **Style family → preset mapping** (when no `--style` hint is provided):
 
@@ -185,7 +191,7 @@ to be confirmed or corrected before generation begins:
 
 - `audience.current_state` — INFERRED:UNKNOWN
 - `audience.desired_state` — INFERRED:UNKNOWN
-- `structure.duration_minutes` — set to 0 (cannot infer from images)
+- `structure.duration_minutes` — estimated as slide_count × 1.5 min; confirm actual talk time
 - [any other INFERRED:UNKNOWN fields]
 
 ## Slide-by-Slide Outline
@@ -198,10 +204,10 @@ to be confirmed or corrected before generation begins:
 ...
 ```
 
-Confidence levels:
-- **HIGH** — ≥80% of slides cleanly classified, verbal content fully legible, palette clearly extractable
-- **MEDIUM** — some low-confidence extractions ([~] markers present), style family ambiguous
-- **LOW** — >20% of slides are `unknown` role, significant text is illegible or missing
+Confidence levels (assign based on the slide set, not subjective feel):
+- **HIGH** — ≥80% of slides cleanly classified (non-`unknown` role), ≤10% of text extractions marked `[~]`, palette extractable with ≥2 confident hex values
+- **MEDIUM** — 60–79% cleanly classified, or 11–25% of extractions marked `[~]`, or style family ambiguous between 2 candidates
+- **LOW** — <60% cleanly classified, or >25% of extractions marked `[~]`, or >20% of slides are `unknown` role, or significant text blocks are `[illegible]`
 
 ## Extraction Quality Boundaries
 

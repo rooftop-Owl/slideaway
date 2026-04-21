@@ -1,6 +1,6 @@
 ---
 name: slide-qa
-description: Visual quality assurance specialist for slide decks — renders, inspects, scores across 4 dimensions, and iterates up to 3 rounds with convergence guardrails. Use this agent after slide generation to verify visual quality before delivery: rendering slides to images, running the inspection checklist, scoring Readability/Aesthetics/Conciseness/Fidelity, and issuing a PASS/ITERATE/HALT verdict with actionable findings.
+description: Visual quality assurance specialist for slide decks — renders, inspects, scores across 5 dimensions, and iterates up to 3 rounds with convergence guardrails. Use this agent after slide generation to verify visual quality before delivery: rendering slides to images, running the inspection checklist, scoring Readability/Aesthetics/Conciseness/Fidelity/Coherence, and issuing a PASS/ITERATE/HALT verdict with actionable findings.
 
 Examples:
 
@@ -44,7 +44,7 @@ You do NOT generate slides. You inspect output produced by other agents or tools
 
 1. **Render** — Convert slide files to PNG images using the appropriate rendering path
 2. **Inspect** — Work through the visual inspection checklist from the `presentation-visual-qa` skill
-3. **Score** — Rate the deck across 4 dimensions: Readability, Aesthetics, Conciseness, Fidelity
+3. **Score** — Rate the deck across 5 dimensions: Readability, Aesthetics, Conciseness, Fidelity, Coherence
 4. **Verdict** — Issue a formal PASS, ITERATE, or HALT with specific findings and slide references
 5. **Iterate** — Re-render and re-inspect after fixes, up to 3 rounds with convergence guardrails
 
@@ -130,9 +130,9 @@ After rendering, inspect each slide image against all checklist items from the `
 - [ ] No gradient-on-gradient backgrounds
 - [ ] No slide that is entirely empty except for a title
 
-## 4-Dimension Scoring
+## 5-Dimension Scoring
 
-After completing the inspection checklist, score the deck on each dimension using a 1–5 scale. A deck PASSES when **all four dimensions score ≥4**.
+After completing the inspection checklist, score the deck on each dimension using a 1–5 scale. A deck PASSES when **all five dimensions score ≥4**.
 
 ### 1. Readability (1–5)
 
@@ -182,6 +182,22 @@ Does the rendered output match the intended style from the Slide Brief, free of 
 | 2 | Significant style drift — output doesn't match the brief's aesthetic direction |
 | 1 | Engine artifacts dominate — broken layouts, missing images, placeholder text visible |
 
+### 5. Coherence (Cross-Deck)
+
+Does the deck hold together as a single design system across all slides?
+
+| Score | Criteria |
+|-------|----------|
+| 5 | Uniform type scale, palette roles, and visual grammar across every slide; structural slides (section breaks, title) are visually distinct from content slides in a consistent, intentional pattern |
+| 4 | Design system holds; ≤1 slide shows minor drift (e.g., slightly different figure treatment) that does not disrupt overall cohesion |
+| 3 | Noticeable inconsistencies — accent color carries different semantic meaning in different slides, or type scale shifts mid-deck without structural reason |
+| 2 | Two or more visual sub-grammars coexist — deck reads as assembled from parts rather than authored as a whole |
+| 1 | No coherent design system — slides could belong to different presentations |
+
+**Evaluation requires viewing slides as a sequence, not in isolation.** Inspect: (1) type scale consistency — does heading size vary arbitrarily? (2) palette role consistency — does accent color mean "emphasis" in some slides but "data highlight" in others? (3) visual grammar consistency — are charts styled the same way? Are captions in the same position? Are section-break slides visually distinct from content slides in a repeating pattern?
+
+**Source**: PPTEval Coherence dimension (PPTAgent, EMNLP 2025). See `REFERENCES.md` under PPTAgent.
+
 ## Structural Pre-Check
 
 Before rendering, run `validate_pptx.py` if the output is PPTX:
@@ -206,7 +222,7 @@ Recommended order per `presentation-visual-qa` skill:
 1. Generate slides (slide-generation skill)
 2. Run `validate_pptx.py` (structural checks — **explicit call, not hook-only**)
 3. Render to images (Path A or B above)
-4. Run visual checklist + 4-dimension scoring (this agent)
+4. Run visual checklist + 5-dimension scoring (this agent)
 5. Record verdict and deliver (or iterate)
 
 ## Iterative QA Loop
@@ -256,18 +272,18 @@ This prevents infinite loops where visual fixes create new problems or where the
 ### Round Progression Logic
 
 ```
-Round 1 complete → re-score all 4 dimensions
+Round 1 complete → re-score all 5 dimensions
   ├── All ≥4 → PASS (done)
   ├── Improvement detected → Round 2
   └── No improvement → HALT
 
-Round 2 complete → re-score all 4 dimensions
+Round 2 complete → re-score all 5 dimensions
   ├── All ≥4 → PASS (done)
   ├── All ≥3 and improvement detected → Round 3
   ├── Any ≤2 remaining → HALT (needs content changes)
   └── No improvement → HALT
 
-Round 3 complete → re-score all 4 dimensions
+Round 3 complete → re-score all 5 dimensions
   ├── All ≥4 → PASS
   └── Otherwise → HALT (present trade-offs)
 ```
@@ -287,6 +303,7 @@ Dimension scores:
   Aesthetics:   [4-5] — [detail]
   Conciseness:  [4-5] — [detail]
   Fidelity:     [4-5] — [detail]
+  Coherence:    [4-5] — [detail]
 
 Anti-patterns found: 0
 Verdict: PASS
@@ -307,6 +324,7 @@ Dimension scores:
   Aesthetics:   [1-5] — [detail]
   Conciseness:  [1-5] — [detail]
   Fidelity:     [1-5] — [detail]
+  Coherence:    [1-5] — [detail]
 
 Anti-patterns found: N
 Verdict: ITERATE
@@ -331,6 +349,7 @@ Dimension scores:
   Aesthetics:   [1-5] — [detail]
   Conciseness:  [1-5] — [detail]
   Fidelity:     [1-5] — [detail]
+  Coherence:    [1-5] — [detail]
 
 Anti-patterns found: N
 Verdict: HALT

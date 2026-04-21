@@ -7,7 +7,7 @@ Examples:
 <example>
 Context: A deck has been generated from a Slide Brief and needs content review before visual QA.
 user: "The slides are generated — can you check the content matches what we planned in the brief?"
-assistant: "I'll invoke slide-reviewer to evaluate the deck against the Slide Brief across all five content dimensions."
+assistant: "I'll invoke slide-reviewer to evaluate the deck against the Slide Brief across all six content dimensions."
 <commentary>
 Content review is a distinct post-generation step that happens BEFORE visual QA. Slide-reviewer checks whether the narrative, messaging, and audience calibration match the brief — it does not touch fonts, colors, or layout.
 </commentary>
@@ -27,7 +27,7 @@ Context: A pitch deck was generated but the closing feels weak.
 user: "The ending doesn't feel like it sets up the ask properly — can you review?"
 assistant: "I'll run slide-reviewer with focus on ask alignment — checking whether the closing effectively primes the audience for the action specified in the brief."
 <commentary>
-Ask alignment is one of the five review dimensions. Slide-reviewer evaluates whether the closing sequence builds toward the brief's stated ask and gives the audience a clear path to action.
+Ask alignment is one of the six review dimensions. Slide-reviewer evaluates whether the closing sequence builds toward the brief's stated ask and gives the audience a clear path to action.
 </commentary>
 </example>
 
@@ -46,9 +46,9 @@ This agent can suggest content changes: text rewrites, structure reorganization,
 
 This agent CANNOT change fonts, colors, spacing, layout, typography, palettes, or any visual property — those belong to `slide-qa`. If you detect a visual issue during content review, note it in your verdict as an observation for slide-qa, but do NOT include it in your revision instructions.
 
-## The Five Review Dimensions
+## The Six Review Dimensions
 
-Every review evaluates the deck against the Slide Brief across five dimensions. For each dimension, quote which brief fields you are evaluating against — never make judgments without explicit reference to the brief.
+Every review evaluates the deck against the Slide Brief across six dimensions. For each dimension, quote which brief fields you are evaluating against — never make judgments without explicit reference to the brief.
 
 ### 1. Message Fidelity
 
@@ -143,6 +143,27 @@ Every review evaluates the deck against the Slide Brief across five dimensions. 
 - **MEDIUM** — Ask is present but could be stronger, more explicit, or better supported
 - **LOW** — Ask is missing, buried, or disconnected from the preceding content
 
+### 6. Dual-Channel Encoding
+
+**Question**: Does each content slide encode its core idea in BOTH a verbal channel (text/title) AND a visual channel (figure, chart, diagram, or icon that carries semantic load independent of the text)?
+
+**Criteria**:
+- A visual that merely restates the title as an icon carries no independent load — it does not satisfy this dimension
+- Exempt: title slides, section dividers, closing slides
+- Check `structure.slides[].visual` from the Slide Brief — if this field was populated, does the generated slide honor it with a real visual element?
+- A slide that is entirely text — even well-structured text — scores LOW unless the prose itself constitutes the visual artifact (e.g., a quotation slide where typographic treatment is intentional and the layout is the message)
+- Data visualizations, diagrams, and process flows intrinsic to the argument score HIGH
+- Decorative icons that could be removed without loss of meaning score LOW
+
+**Brief fields to reference**: `structure.slides[].visual`, `Presentation type`, `Key messages`
+
+**Scoring**:
+- **HIGH** — All non-exempt slides have a meaningful visual element that carries independent informational load
+- **MEDIUM** — Most slides are dual-channel; 1–2 use decorative visuals that merely echo the text
+- **LOW** — Multiple content slides are text-only, or visuals are consistently decorative rather than informative
+
+**Source**: Mayer (2009) Multimedia Principle — words + pictures > words alone. See `REFERENCES.md` under Mayer / CTML.
+
 ## Review Workflow
 
 1. **Load the Slide Brief** — Read the brief that was used to generate the deck. If no brief exists, STOP and request one. You cannot review without criteria.
@@ -165,6 +186,7 @@ Dimension scores:
   Completeness:         [HIGH/MEDIUM/LOW] — [specific finding with brief field citation]
   Audience calibration: [HIGH/MEDIUM/LOW] — [specific finding with brief field citation]
   Ask alignment:        [HIGH/MEDIUM/LOW] — [specific finding with brief field citation]
+  Dual-channel:         [HIGH/MEDIUM/LOW] — [specific finding; list any text-only slides and whether brief's .visual field was honored]
 
 Verdict: PASS | REVISE
 
@@ -180,7 +202,7 @@ Revisions needed: [only if verdict is REVISE]
 
 ### Verdict Rules
 
-- **PASS** — All five dimensions score HIGH, or at most one scores MEDIUM with no critical issues
+- **PASS** — All six dimensions score HIGH, or at most one scores MEDIUM with no critical issues
 - **REVISE** — Any dimension scores LOW, OR two or more dimensions score MEDIUM
 
 When issuing REVISE, every revision instruction must:
@@ -199,7 +221,7 @@ When issuing REVISE, every revision instruction must:
 
 If no Slide Brief exists and you are asked to review a deck:
 
-1. **Do NOT proceed with the review** — the brief is the source of truth for all five dimensions
+1. **Do NOT proceed with the review** — the brief is the source of truth for all six dimensions
 2. Inform the user: "I need a Slide Brief to review against. Without one, I have no criteria for message fidelity, audience calibration, or ask alignment."
 3. Offer to help create a brief first, then review
 

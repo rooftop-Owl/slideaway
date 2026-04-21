@@ -1,7 +1,7 @@
 # 🎯 Slideaway
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.3.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-2.4.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/engines-7-green?style=for-the-badge" alt="7 Engines">
   <img src="https://img.shields.io/badge/styles-30-purple?style=for-the-badge" alt="30 Styles">
   <img src="https://img.shields.io/badge/agents-3-red?style=for-the-badge" alt="3 Agents">
@@ -51,8 +51,8 @@ Most presentation tools generate generic AI output. Slideaway enforces quality t
 | Agent | Role | Phase |
 |-------|------|-------|
 | **slide-coach** | Discovery & planning — audience analysis, narrative arc, brief, outline | Phase 0 |
-| **slide-reviewer** | Content quality — 5-dimension review (accuracy, narrative, density, audience, citations) | Phase 3 |
-| **slide-qa** | Design quality — 4-dimension visual QA (layout, typography, color, contrast), 3 rounds max | Phase 4 |
+| **slide-reviewer** | Content quality — 6-dimension review (message fidelity, narrative, completeness, audience, ask alignment, dual-channel encoding) | Phase 3 |
+| **slide-qa** | Design quality — 5-dimension visual QA (readability, aesthetics, conciseness, fidelity, coherence), 3 rounds max | Phase 4 |
 
 ### Commands
 

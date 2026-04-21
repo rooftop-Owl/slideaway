@@ -64,13 +64,13 @@
       "properties": {
         "duration_minutes": {
           "type": "integer",
-          "minimum": 1,
-          "description": "Total talk time in minutes, excluding Q&A."
+          "minimum": 0,
+          "description": "Total talk time in minutes, excluding Q&A. 0 = unknown (extractor default when duration cannot be inferred)."
         },
         "slide_count_target": {
           "type": "integer",
-          "minimum": 1,
-          "description": "Target number of content slides, not counting title or backup slides."
+          "minimum": 0,
+          "description": "Target number of content slides. 0 = unknown (extractor default)."
         },
         "narrative_arc": {
           "type": "string",
@@ -122,8 +122,7 @@
         },
         "anti_slop_verified": {
           "type": "boolean",
-          "const": true,
-          "description": "Coach confirms the preset passes anti-slop checks. Must be true — false triggers a hard failure."
+          "description": "True when slide-coach has confirmed the preset passes anti-slop checks at the Phase 0f approval gate. Extractor drafts always write false; the human confirms at 0f."
         }
       }
     },
@@ -153,7 +152,13 @@
       "properties": {
         "brand": {
           "type": "object",
-          "description": "Corporate identity overrides: {logo_path, primary_color, secondary_color, font_family}"
+          "additionalProperties": false,
+          "properties": {
+            "logo_path": {"type": "string"},
+            "primary_color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+            "secondary_color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+            "font_family": {"type": "string"}
+          }
         },
         "accessibility": {
           "type": "object",
@@ -179,6 +184,7 @@
           "items": {
             "type": "object",
             "required": ["path", "type"],
+            "additionalProperties": false,
             "properties": {
               "path": {"type": "string"},
               "type": {"type": "string"},

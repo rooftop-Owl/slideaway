@@ -12,14 +12,24 @@
 
 set -euo pipefail
 
+# Guard: CLAUDE_PLUGIN_ROOT must be set for the linter path to resolve
+if [[ -z "${CLAUDE_PLUGIN_ROOT:-}" ]]; then
+  echo "slide-lint-hook: CLAUDE_PLUGIN_ROOT not set — skipping lint" >&2
+  exit 0
+fi
+
 input=$(cat)
 
 filepath=$(echo "$input" | python3 -c "
 import sys, json
-data = json.load(sys.stdin)
-tool_input = data.get('tool_input', {})
-print(tool_input.get('filePath', tool_input.get('file_path', '')))
-" 2>/dev/null || echo "")
+try:
+    data = json.load(sys.stdin)
+    tool_input = data.get('tool_input', {})
+    print(tool_input.get('filePath', tool_input.get('file_path', '')))
+except Exception as e:
+    print('', end='')
+    sys.exit(0)
+" 2>&1) || filepath=""
 
 # EARLY EXIT: skip non-.pptx files — this fires on every Write|Edit
 if [[ -z "$filepath" ]] || [[ "$filepath" != *.pptx ]]; then

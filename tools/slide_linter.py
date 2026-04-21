@@ -20,6 +20,12 @@ from __future__ import annotations
 import argparse
 import sys
 
+try:
+    from pptx import Presentation
+except ImportError:
+    # python-pptx not installed — skip linting rather than blocking writes.
+    Presentation = None  # type: ignore[assignment, misc]
+
 # Copied from validate_pptx.BANNED_FONTS — keep in sync with that definition.
 BANNED_FONTS: frozenset[str] = frozenset({
     "Inter",
@@ -28,6 +34,11 @@ BANNED_FONTS: frozenset[str] = frozenset({
     "system-ui",
     "sans-serif",
 })
+
+# Placeholder indices that represent non-body content (decorators, footers,
+# slide numbers). We skip these when classifying slide type and counting bullets
+# so that footer text does not incorrectly trigger heading or bullet rules.
+_DECORATOR_PLACEHOLDER_INDICES: frozenset[int] = frozenset({10, 11, 12, 13, 14, 15})
 
 
 def _slide_type(slide) -> str:
@@ -45,8 +56,11 @@ def _slide_type(slide) -> str:
         if tf is None or not tf.text.strip():
             continue
         ph = getattr(shape, "placeholder_format", None)
-        if ph is not None and ph.idx == 0:
-            has_title = True
+        if ph is not None:
+            if ph.idx == 0:
+                has_title = True
+            elif ph.idx not in _DECORATOR_PLACEHOLDER_INDICES:
+                has_body_text = True
         else:
             has_body_text = True
 
@@ -65,8 +79,8 @@ def _count_top_level_bullets(slide) -> int:
         if tf is None:
             continue
         ph = getattr(shape, "placeholder_format", None)
-        if ph is not None and ph.idx == 0:
-            continue  # skip the title placeholder itself
+        if ph is not None and (ph.idx == 0 or ph.idx in _DECORATOR_PLACEHOLDER_INDICES):
+            continue
         for para in tf.paragraphs:
             if para.text.strip() and para.level == 0:
                 count += 1
@@ -98,15 +112,18 @@ def _check_runs(slide, slide_idx: int) -> list[dict]:
             continue
         for para in tf.paragraphs:
             for run in para.runs:
-                if not run.text.strip():
+                if not (run.text or "").strip():
                     continue
-                font_name = run.font.name
+                try:
+                    font_name = run.font.name
+                except Exception:
+                    continue  # malformed run XML — skip without crashing
                 if font_name and font_name in BANNED_FONTS:
                     issues.append({
                         "slide": slide_idx,
                         "type": "banned_font",
                         "severity": "fail",
-                        "detail": f"banned font '{font_name}' on '{run.text[:32]}'"
+                        "detail": f"banned font '{font_name}' on '{(run.text or '')[:32]}'"
                     })
     return issues
 
@@ -121,12 +138,21 @@ def lint_pptx(
     Returns (failures, warnings). Callers should exit with code 2 on failures,
     1 on warnings-only, 0 on clean.
     """
-    from pptx import Presentation
+    if Presentation is None:
+        print("slide_linter: python-pptx not installed — linting skipped", file=sys.stderr)
+        return [], []
+
+    try:
+        prs = Presentation(pptx_path)
+    except FileNotFoundError:
+        print(f"slide_linter: file not found: {pptx_path}", file=sys.stderr)
+        sys.exit(2)
+    except Exception as e:
+        print(f"slide_linter: failed to open {pptx_path}: {e}", file=sys.stderr)
+        sys.exit(2)
 
     failures: list[dict] = []
     warnings: list[dict] = []
-
-    prs = Presentation(pptx_path)
 
     for slide_idx, slide in enumerate(prs.slides, 1):
         stype = _slide_type(slide)
@@ -171,23 +197,25 @@ def main() -> int:
         help="Max top-level bullets per content slide (default: 6)",
     )
     parser.add_argument(
-        "--require-heading", action="store_true", default=True,
-        help="Fail if a content slide has no title placeholder (default: enabled)",
-    )
-    parser.add_argument(
         "--no-require-heading", dest="require_heading", action="store_false",
+        help="Allow content slides without a title placeholder",
     )
+    parser.set_defaults(require_heading=True)
     parser.add_argument(
         "--quiet", action="store_true",
         help="Suppress passing output; still prints failures to stderr",
     )
     args = parser.parse_args()
 
-    failures, warnings = lint_pptx(
-        args.pptx_path,
-        max_bullets=args.max_bullets,
-        require_heading=args.require_heading,
-    )
+    try:
+        failures, warnings = lint_pptx(
+            args.pptx_path,
+            max_bullets=args.max_bullets,
+            require_heading=args.require_heading,
+        )
+    except Exception as e:
+        print(f"slide_linter: unexpected error: {e}", file=sys.stderr)
+        return 2
 
     for w in warnings:
         print(f"WARN slide {w['slide']}: {w['detail']}")

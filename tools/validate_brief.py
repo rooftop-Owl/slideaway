@@ -13,7 +13,6 @@ Hard failures (exit 2):
   F1  JSON parse error or missing required field
   F2  Invalid enum value
   F3  schema_version mismatch
-  F4  anti_slop_verified is false or absent
   F5  time_blocks minutes do not sum to duration_minutes (±1 min tolerance)
   F6  A slide_range upper bound exceeds slide_count_target + 2
 
@@ -21,6 +20,7 @@ Warnings (exit 1):
   W1  attention_budget=low with duration > 30 min
   W2  talk_type=lightning with duration > 5 min
   W3  talk_type=tutorial with no source_material entries
+  W4  anti_slop_verified is false or absent (not yet confirmed at Phase 0f)
 """
 
 from __future__ import annotations
@@ -46,20 +46,34 @@ def _validate_schema(brief: dict) -> list[str]:
     """Run jsonschema validation if available; fall back to manual required-field check."""
     failures: list[str] = []
 
-    schema_path = Path(__file__).resolve().parents[1] / "skills" / "slide-generation" / "references" / "slide-brief.schema.json"
+    schema_path = (
+        Path(__file__).resolve().parents[1]
+        / "skills"
+        / "slide-generation"
+        / "references"
+        / "slide-brief.schema.json"
+    )
 
     if schema_path.exists():
         try:
             import jsonschema  # type: ignore[import]
-            with open(schema_path, encoding="utf-8") as f:
-                schema = json.load(f)
-            validator = jsonschema.Draft7Validator(schema)
-            for error in sorted(validator.iter_errors(brief), key=lambda e: list(e.path)):
-                path = ".".join(str(p) for p in error.path) or "<root>"
-                failures.append(f"F2 schema: {path}: {error.message}")
-            return failures
         except ImportError:
             pass  # fall through to manual check
+        else:
+            try:
+                with open(schema_path, encoding="utf-8") as f:
+                    schema = json.load(f)
+                validator = jsonschema.Draft7Validator(schema)
+                for error in sorted(
+                    validator.iter_errors(brief),
+                    key=lambda e: ".".join(str(p) for p in e.path),
+                ):
+                    path = ".".join(str(p) for p in error.path) or "<root>"
+                    failures.append(f"F2 schema: {path}: {error.message}")
+                return failures
+            except Exception as e:
+                failures.append(f"F1 schema validation error: {e}")
+                return failures
 
     # Manual required-field check when jsonschema is unavailable
     required_top = ["schema_version", "audience", "purpose", "structure", "style", "delivery"]
@@ -98,23 +112,25 @@ def _check_semantic_failures(brief: dict) -> list[str]:
     """Semantic rules that JSON Schema cannot express."""
     failures: list[str] = []
 
-    # F3: schema_version
-    sv = brief.get("schema_version", "")
-    if sv != "slide-brief/1.0":
-        failures.append(f"F3 schema_version must be 'slide-brief/1.0', got: '{sv}'")
-
-    # F4: anti_slop_verified
-    style = brief.get("style", {})
-    if not style.get("anti_slop_verified", False):
-        failures.append("F4 style.anti_slop_verified must be true")
+    # F3: schema_version — only fires when key is present; absence is already F1
+    if "schema_version" in brief:
+        sv = brief["schema_version"]
+        if sv != "slide-brief/1.0":
+            failures.append(f"F3 schema_version must be 'slide-brief/1.0', got: '{sv}'")
 
     structure = brief.get("structure", {})
     duration = structure.get("duration_minutes")
     slide_count = structure.get("slide_count_target")
     time_blocks = structure.get("time_blocks", [])
 
-    # F5: time_blocks sum
-    if duration is not None and isinstance(time_blocks, list) and time_blocks:
+    # F5: time_blocks sum — skip if duration is non-numeric (e.g. extractor wrote 0 for unknown)
+    if (
+        duration is not None
+        and isinstance(duration, (int, float))
+        and duration > 0
+        and isinstance(time_blocks, list)
+        and time_blocks
+    ):
         total = sum(b.get("minutes", 0) for b in time_blocks if isinstance(b, dict))
         if abs(total - duration) > 1:
             failures.append(
@@ -122,8 +138,13 @@ def _check_semantic_failures(brief: dict) -> list[str]:
                 f"duration_minutes ({duration} min) — difference {abs(total - duration):.1f} min exceeds 1-min tolerance"
             )
 
-    # F6: slide_range upper bound
-    if slide_count is not None and isinstance(time_blocks, list):
+    # F6: slide_range upper bound — skip if slide_count is non-integer
+    if (
+        slide_count is not None
+        and isinstance(slide_count, int)
+        and slide_count > 0
+        and isinstance(time_blocks, list)
+    ):
         limit = slide_count + 2
         for i, block in enumerate(time_blocks):
             if not isinstance(block, dict):
@@ -178,6 +199,13 @@ def _check_warnings(brief: dict) -> list[str]:
                 "tutorial decks should reference the material they teach"
             )
 
+    # W4: anti_slop_verified not confirmed — extractors always write false; human confirms at 0f
+    if "style" in brief and not brief["style"].get("anti_slop_verified", False):
+        warnings.append(
+            "W4 style.anti_slop_verified is false — the style preset has not been confirmed "
+            "at the Phase 0f approval gate; slide-coach must verify before generation"
+        )
+
     return warnings
 
 
@@ -189,10 +217,7 @@ def validate_brief(brief_path: str) -> tuple[list[str], list[str]]:
 
     failures: list[str] = []
     failures.extend(_validate_schema(brief))
-
-    # Only run semantic checks if schema passed (avoid cascading noise on broken JSON)
-    if not failures:
-        failures.extend(_check_semantic_failures(brief))
+    failures.extend(_check_semantic_failures(brief))
 
     warnings = _check_warnings(brief)
     return failures, warnings
@@ -210,7 +235,11 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    failures, warnings = validate_brief(args.brief_path)
+    try:
+        failures, warnings = validate_brief(args.brief_path)
+    except Exception as e:
+        print(f"validate_brief: unexpected error: {e}", file=sys.stderr)
+        return 2
 
     for w in warnings:
         print(f"WARN {w}")

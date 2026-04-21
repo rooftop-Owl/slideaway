@@ -150,13 +150,21 @@ if __name__ == "__main__":
 
 ## 3. Automated Contrast Checking
 
-Low contrast between text and background is the most common accessibility failure in presentations. The WCAG standard requires 4.5:1 for normal text (AA) and 7:1 for enhanced accessibility (AAA).
+Low contrast between text and background is the most common accessibility failure in presentations. WCAG 2.1 requires 4.5:1 for normal text (AA) and 3:1 for large text (≥18pt or ≥14pt bold).
 
-### When to Use
+**Authority model** (V2.5): Element-level checks are authoritative for QA pass/fail where the engine permits. The percentile pre-filter below runs first as a fast screen — a slide failing the pre-filter needs element-level investigation; a slide passing it is NOT cleared, because the pre-filter cannot see element pairs.
 
-Run `check_contrast` on slides with text-heavy content, slides using colored backgrounds, and any slide where text color deviates from black-on-white.
+### Engine-Aware Check Selection
 
-### Full Working Script
+| Engine | Authoritative method | Pre-filter |
+|--------|---------------------|------------|
+| Marp, reveal.js, HTML | Playwright DOM (computed fg/bg per text node) | percentile |
+| md2pptx, python-pptx | python-pptx text frame scan | percentile |
+| beamer, RISE | Percentile only (known-weak fallback — flagged in QA report) | percentile |
+
+### Step 1 — Percentile Pre-Filter (All Engines)
+
+Runs on rendered PNG images. **Does not constitute a WCAG pass/fail judgment.** A slide with a bright chart region can have a high percentile ratio while all text fails AA against its local background.
 
 ```python
 import numpy as np
@@ -164,104 +172,236 @@ from PIL import Image
 from pathlib import Path
 
 
-def check_contrast(image_path):
+def percentile_prefilter(image_path: str) -> tuple[float, bool]:
     """
-    Estimate contrast ratio of a slide image using luminance percentiles.
+    Fast contrast pre-filter using global luminance percentiles.
 
-    Uses the 95th percentile as the 'bright' reference and the 5th percentile
-    as the 'dark' reference, approximating the contrast between background
-    and foreground text regions.
-
-    Args:
-        image_path: Path to slide image (PNG or JPEG)
-
-    Returns:
-        Tuple of (ratio: float, passes_aa: bool)
-        - ratio: Estimated contrast ratio (higher = more contrast)
-        - passes_aa: True if ratio >= 4.5 (WCAG AA standard)
+    Returns (ratio, has_any_contrast) where has_any_contrast=False means
+    the entire slide is near-uniform — almost certainly a rendering failure,
+    not a contrast failure. Does NOT constitute WCAG compliance.
     """
     img = Image.open(image_path).convert('L')
     arr = np.array(img)
-
     bright = np.percentile(arr, 95)
     dark = np.percentile(arr, 5)
-
     ratio = (bright + 0.05) / (dark + 0.05)
-    return ratio, ratio >= 4.5
+    return ratio, ratio >= 1.5  # threshold: any meaningful contrast at all
+```
+
+### Step 2A — Element-Level Check: HTML Engines (Playwright)
+
+Use for Marp, reveal.js, and any HTML-rendering engine. Extracts computed `color` and `background-color` for each text node from the DOM **before** screenshot — the only approach that gives WCAG-valid element pairs.
+
+```python
+from playwright.sync_api import sync_playwright
 
 
-def check_contrast_aaa(image_path):
+def check_contrast_html(html_path: str, slide_index: int = 1) -> dict:
     """
-    Check contrast against WCAG AAA standard (7:1 ratio).
-
-    Args:
-        image_path: Path to slide image
+    Extract element-level fg/bg pairs and compute WCAG 2.1 contrast ratios.
 
     Returns:
-        Tuple of (ratio: float, passes_aaa: bool)
+        {
+          "slide": slide_index,
+          "failures": [
+            {"text": "...", "fg": "#rrggbb", "bg": "#rrggbb",
+             "ratio": 3.2, "required": 4.5}
+          ]
+        }
     """
-    ratio, _ = check_contrast(image_path)
-    return ratio, ratio >= 7.0
+    def relative_luminance(hex_color: str) -> float:
+        hex_color = hex_color.lstrip('#')
+        r, g, b = (int(hex_color[i:i+2], 16) / 255 for i in (0, 2, 4))
+        def linearize(c: float) -> float:
+            return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+        return 0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b)
+
+    def contrast_ratio(fg: str, bg: str) -> float:
+        l1 = relative_luminance(fg)
+        l2 = relative_luminance(bg)
+        lighter, darker = max(l1, l2), min(l1, l2)
+        return (lighter + 0.05) / (darker + 0.05)
+
+    failures = []
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1920, "height": 1080})
+        page.goto(f"file://{html_path}", wait_until="networkidle")
+
+        text_nodes = page.evaluate("""() => {
+            const results = [];
+            const walker = document.createTreeWalker(
+                document.body, NodeFilter.SHOW_TEXT,
+                { acceptNode: n => n.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP }
+            );
+            let node;
+            while ((node = walker.nextNode())) {
+                const el = node.parentElement;
+                const style = window.getComputedStyle(el);
+                const text = node.textContent.trim().slice(0, 60);
+                const fontSize = parseFloat(style.fontSize);
+                const fontWeight = style.fontWeight;
+                results.push({
+                    text,
+                    fg: style.color,
+                    bg: style.backgroundColor,
+                    fontSize,
+                    bold: parseInt(fontWeight) >= 700,
+                });
+            }
+            return results;
+        }""")
+
+        browser.close()
+
+    def parse_rgb(css: str) -> str | None:
+        import re
+        m = re.match(r'rgba?\((\d+),\s*(\d+),\s*(\d+)', css)
+        if not m:
+            return None
+        return '#{:02x}{:02x}{:02x}'.format(*map(int, m.groups()))
+
+    for node in text_nodes:
+        fg = parse_rgb(node['fg'])
+        bg = parse_rgb(node['bg'])
+        if not fg or not bg or fg == bg:
+            continue
+        ratio = contrast_ratio(fg, bg)
+        large_text = node['fontSize'] >= 18 or (node['fontSize'] >= 14 and node['bold'])
+        required = 3.0 if large_text else 4.5
+        if ratio < required:
+            failures.append({
+                "text": node['text'],
+                "fg": fg,
+                "bg": bg,
+                "ratio": round(ratio, 2),
+                "required": required,
+            })
+
+    return {"slide": slide_index, "failures": failures}
+```
+
+### Step 2B — Element-Level Check: PPTX Engines (python-pptx)
+
+Use for `md2pptx`, `pptx`, and `python-pptx`-based engines. Iterates text frames, resolves theme colors, and computes contrast against the slide background fill or the shape's own fill.
+
+```python
+from pptx import Presentation
+from pptx.util import Pt
+from pptx.dml.color import RGBColor
 
 
-def scan_contrast_all_slides(slides_dir, standard='aa'):
+def _resolve_color(color_format, theme_colors: dict) -> str | None:
+    """Resolve a pptx ColorFormat to a hex string, consulting theme if needed."""
+    try:
+        if color_format.type is not None:
+            rgb = color_format.rgb
+            return f'#{rgb.red:02x}{rgb.green:02x}{rgb.blue:02x}'
+    except Exception:
+        pass
+    return None
+
+
+def _relative_luminance(hex_color: str) -> float:
+    hex_color = hex_color.lstrip('#')
+    r, g, b = (int(hex_color[i:i+2], 16) / 255 for i in (0, 2, 4))
+    def lin(c: float) -> float:
+        return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+
+
+def check_contrast_pptx(pptx_path: str) -> list[dict]:
     """
-    Scan all slides for contrast compliance.
+    Scan all slides for element-level contrast failures.
 
-    Args:
-        slides_dir: Directory containing slide images
-        standard: 'aa' (4.5:1) or 'aaa' (7:1)
-
-    Returns:
-        Dict mapping filename to (ratio, passes) tuples
+    Returns list of per-slide dicts:
+        {"slide": N, "failures": [{"text", "fg", "bg", "ratio", "required"}]}
     """
-    slides_dir = Path(slides_dir)
-    threshold = 7.0 if standard == 'aaa' else 4.5
-    results = {}
+    prs = Presentation(pptx_path)
+    results = []
 
-    for image_path in sorted(slides_dir.glob("*.png")):
-        img = Image.open(image_path).convert('L')
-        arr = np.array(img)
-        bright = np.percentile(arr, 95)
-        dark = np.percentile(arr, 5)
-        ratio = (bright + 0.05) / (dark + 0.05)
-        passes = ratio >= threshold
-        results[image_path.name] = (round(ratio, 2), passes)
+    for slide_idx, slide in enumerate(prs.slides, 1):
+        failures = []
+
+        # Slide background color (best-effort)
+        bg_hex = '#ffffff'
+        try:
+            bg_fill = slide.background.fill
+            if bg_fill.type is not None:
+                rgb = bg_fill.fore_color.rgb
+                bg_hex = f'#{rgb.red:02x}{rgb.green:02x}{rgb.blue:02x}'
+        except Exception:
+            pass
+
+        for shape in slide.shapes:
+            tf = getattr(shape, 'text_frame', None)
+            if tf is None:
+                continue
+            shape_bg = bg_hex
+            try:
+                if shape.fill.type is not None:
+                    rgb = shape.fill.fore_color.rgb
+                    shape_bg = f'#{rgb.red:02x}{rgb.green:02x}{rgb.blue:02x}'
+            except Exception:
+                pass
+
+            for para in tf.paragraphs:
+                for run in para.runs:
+                    if not run.text.strip():
+                        continue
+                    fg = _resolve_color(run.font.color, {})
+                    if fg is None:
+                        continue
+                    l1 = _relative_luminance(fg)
+                    l2 = _relative_luminance(shape_bg)
+                    lighter, darker = max(l1, l2), min(l1, l2)
+                    ratio = (lighter + 0.05) / (darker + 0.05)
+                    size_pt = run.font.size.pt if run.font.size else 12
+                    bold = run.font.bold or False
+                    large = size_pt >= 18 or (size_pt >= 14 and bold)
+                    required = 3.0 if large else 4.5
+                    if ratio < required:
+                        failures.append({
+                            "text": run.text[:60],
+                            "fg": fg,
+                            "bg": shape_bg,
+                            "ratio": round(ratio, 2),
+                            "required": required,
+                        })
+
+        results.append({"slide": slide_idx, "failures": failures})
 
     return results
-
-
-if __name__ == "__main__":
-    import sys
-
-    slides_dir = sys.argv[1] if len(sys.argv) > 1 else "slides_images"
-    standard = sys.argv[2] if len(sys.argv) > 2 else "aa"
-
-    results = scan_contrast_all_slides(slides_dir, standard)
-    failures = {f: r for f, r in results.items() if not r[1]}
-
-    if not failures:
-        print(f"✓ All slides pass WCAG {standard.upper()} contrast standard")
-    else:
-        print(f"⚠ Contrast failures ({standard.upper()}) in {len(failures)} slide(s):")
-        for filename, (ratio, _) in failures.items():
-            print(f"  {filename}: ratio = {ratio:.2f} (required: "
-                  f"{'7.0' if standard == 'aaa' else '4.5'})")
 ```
+
+### Output Format
+
+Both checkers produce the same structure so downstream QA logic is engine-agnostic:
+
+```json
+{"slide": 3, "failures": [
+  {"text": "Key finding", "fg": "#777777", "bg": "#888888",
+   "ratio": 1.1, "required": 4.5}
+]}
+```
+
+A slide with `"failures": []` passes element-level WCAG AA. Report failures with slide number, failing text excerpt, computed ratio, and required threshold.
 
 ### Interpreting Contrast Ratios
 
 | Ratio | Standard | Interpretation |
 |-------|----------|----------------|
-| < 3.0 | Fails AA | Severe contrast issue — likely unreadable |
-| 3.0–4.4 | Fails AA | Marginal — acceptable only for large text (18pt+) |
+| < 3.0 | Fails AA (all text) | Severe — unreadable at projection distance |
+| 3.0–4.4 | Fails AA (normal); passes large text | Acceptable only for ≥18pt or ≥14pt bold |
 | 4.5–6.9 | Passes AA | Acceptable for normal text |
 | 7.0+ | Passes AAA | Recommended for virtual delivery and accessibility |
-| 15.0+ | Exceeds AAA | Typical for black text on white background |
 
-### Limitations
+### Known Gaps (V2.5)
 
-The `np.percentile`-based approach is a global estimate. It works well for slides with clear foreground/background separation. For slides with complex imagery or gradients, supplement with manual visual review.
+- **Beamer / RISE**: No element-level implementation. QA reports must note "contrast check: percentile pre-filter only — not WCAG authoritative" for these engines. Closing in V2.5.1.
+- **Gradient backgrounds**: python-pptx cannot reliably resolve gradient fill stops to a single background color. Report as "indeterminate" rather than inventing a ratio.
+- **Translucent overlays**: Playwright computes `background-color` of the immediate parent; stacked translucent layers are not resolved. Flag for manual review when opacity < 1.
 
 ---
 

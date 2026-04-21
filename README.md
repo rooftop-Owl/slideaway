@@ -1,7 +1,7 @@
 # 🎯 Slideaway
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.4.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-2.5.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/engines-7-green?style=for-the-badge" alt="7 Engines">
   <img src="https://img.shields.io/badge/styles-30-purple?style=for-the-badge" alt="30 Styles">
   <img src="https://img.shields.io/badge/agents-3-red?style=for-the-badge" alt="3 Agents">

@@ -46,6 +46,7 @@ Delegates to the orchestrating agent with subdirectory skill `slide-generation` 
 | `--refine` | false | After generation, auto-inspect and fix issues (opt-in, max 3 rounds). Uses slide-qa agent. |
 | `--style <name>` | — | Use a specific style preset by name (e.g., --style executive-suite). Skips style selection. |
 | `--no-coach` | false | Skip Phase 0 discovery. Use provided flags directly for engine/style/duration. For agent-to-agent or power-user use. |
+| `--brief-json <path>` | — | Supply a pre-built Slide Brief as JSON (validated against `slide-brief/1.0` schema). Skips Phase 0a–0c (signal parsing, completeness check, gap-fill). Runs `validate_brief.py` at 0d, then proceeds to 0f approval gate. |
 
 ## Agents Involved
 

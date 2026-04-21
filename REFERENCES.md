@@ -33,6 +33,7 @@
 
 | Pattern | Description | Relevance | Priority |
 |---------|-------------|-----------|----------|
+| **PPTEval Coherence dimension** | Deck-level evaluation: do all slides structurally belong together? Structural roles (opening/section/closing) visually distinct from content slides? | **Adopted in V2.4** — `agents/slide-qa.md` Dimension 5 (Coherence). Evaluation requires viewing slides as a sequence, not in isolation. | Adopted |
 | **Edit-based generation** | Instead of creating slides from scratch, analyze reference presentations → extract functional types + content schemas → generate editing actions on reference slides | **Medium** — fundamentally different paradigm; would require template library | Evaluate feasibility |
 | **Slide clustering / functional typing** | Categorize slides into structural (opening, section break, closing) vs. content (bullet-point, data, diagram) types before generation | **Medium** — could improve layout archetype selection in Phase 2 | Evaluate |
 | **REPL-based self-correction** | Execute editing actions in REPL; failures feed back to LLM for refinement (vs. our error-classification approach) | **Low** — our compile-check loop serves similar purpose for Beamer | Monitor |
@@ -63,6 +64,7 @@
 
 | Pattern | Description | Relevance | Priority |
 |---------|-------------|-----------|----------|
+| **CTML dual-channel optimization** | Every slide should encode its core idea in BOTH a verbal channel (text/title) AND a visual channel (figure/diagram/chart). Mayer's Multimedia Principle. | **Adopted in V2.4** — `agents/slide-reviewer.md` Dimension 6 (Dual-Channel Encoding). Fails slides whose visual is decorative rather than semantically load-bearing. | Adopted |
 | **Intrinsic load management** | Structured planning to cap content complexity per slide — not just bullet count but conceptual density | **High** — our 6×6 rule and 3-bullet max are crude proxies; CLT provides a theory-grounded metric | Next version |
 | **Extraneous load reduction via visual macros** | Consistent visual patterns (not just anti-slop bans) that reduce cognitive effort: same chart style, same caption placement, same color encoding across the deck | **High** — our anti-slop rules catch bad patterns but we lack positive consistency rules | Next version |
 | **Retrieval integration** | External source retrieval for factual grounding of slide content | **Medium** — relevant for research workflows; could integrate with Zotero plugin | Evaluate |
@@ -187,7 +189,7 @@ Nothing yet — noted in 2026-04-04 digest.
 
 | Pattern | Description | Relevance | Priority |
 |---------|-------------|-----------|----------|
-| **Programmatic slide linter** | Lint rules (bullet count, heading presence, font bans, color violations) as code — runs before visual QA | **High** — our `validate_pptx.py` does structural validation but not content linting | Next version |
+| **Programmatic slide linter** | Lint rules (bullet count, heading presence, font bans, color violations) as code — runs before visual QA | **Adopted in V2.5** — `tools/slide_linter.py` + `hooks/scripts/slide-lint-hook.sh`. Fixes the known `validate_pptx.py` hole where only the first text run is checked for banned fonts. | Adopted |
 | **Harness architecture** | Wraps generation + linting + QA into a repeatable harness | **Medium** — our Phase pipeline is similar conceptually | Evaluate |
 
 - **Last checked**: 2026-04-07
@@ -335,10 +337,10 @@ Quick reference: what influenced what.
 | Anti-AI-slop rules | Original to slideaway + community observation | ✅ Original work |
 | WCAG contrast standards | W3C WCAG 2.1 | ✅ Cited by standard name |
 | Colorblind palette (Style 18) | Okabe & Ito (2002) | ✅ Cited by name |
-| CLT / CTML design theory | Sweller (1988), Mayer (2009) via SlideBot | ✅ Multimedia Principle adopted as slide-reviewer Dimension 6 (V2.4); intrinsic/extraneous load pending |
-| PPTEval evaluation framework | PPTAgent (EMNLP 2025) | ✅ Coherence adopted as slide-qa Dimension 5 (V2.4); edit-based generation + slide clustering pending |
+| CLT / CTML design theory | Sweller (1988), Mayer (2009) via SlideBot | ✅ Adopted in `agents/slide-reviewer.md` Dimension 6 (V2.4) |
+| PPTEval evaluation framework | PPTAgent (EMNLP 2025) | ✅ Adopted in `agents/slide-qa.md` Dimension 5 (V2.4) |
 | 5-step design methodology | Visual communication practitioner consensus | ⚠️ `slide-patterns.md` says "Adapted from visual communication principles" — vague |
-| Slide linter concept | vkehfdl1/slides-grab | ❌ Not adopted — planned for V2.5 |
+| Slide linter concept | vkehfdl1/slides-grab | ✅ Adopted in `tools/slide_linter.py` + hook (V2.5) |
 
 ---
 

@@ -1,0 +1,206 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "slide-brief/1.0",
+  "title": "Slide Brief",
+  "description": "Contract between slide-coach and all downstream pipeline stages. Machine-readable translation of slide-brief-schema.md.",
+  "type": "object",
+  "required": ["schema_version", "audience", "purpose", "structure", "style", "delivery"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "slide-brief/1.0",
+      "description": "Must be exactly 'slide-brief/1.0'. Reject any other value."
+    },
+    "audience": {
+      "type": "object",
+      "required": ["current_state", "desired_state", "quadrant", "attention_budget"],
+      "additionalProperties": false,
+      "properties": {
+        "current_state": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What the audience believes or knows right now. One sentence."
+        },
+        "desired_state": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What the audience should believe or know after the talk. One sentence."
+        },
+        "quadrant": {
+          "type": "string",
+          "enum": ["deep-insider", "deep-outsider", "shallow-insider", "shallow-outsider"]
+        },
+        "attention_budget": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        }
+      }
+    },
+    "purpose": {
+      "type": "object",
+      "required": ["the_one_thing", "the_ask", "talk_type"],
+      "additionalProperties": false,
+      "properties": {
+        "the_one_thing": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Single sentence the audience must remember. The core message."
+        },
+        "the_ask": {
+          "type": "string",
+          "enum": ["fund", "adopt", "approve", "collaborate", "understand", "implement", "teach", "decide", "none"]
+        },
+        "talk_type": {
+          "type": "string",
+          "enum": ["conference", "seminar", "defense", "pitch", "journal-club", "lightning", "tutorial", "internal", "workshop"]
+        }
+      }
+    },
+    "structure": {
+      "type": "object",
+      "required": ["duration_minutes", "slide_count_target", "narrative_arc", "time_blocks"],
+      "additionalProperties": false,
+      "properties": {
+        "duration_minutes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total talk time in minutes, excluding Q&A. 0 = unknown (extractor default when duration cannot be inferred)."
+        },
+        "slide_count_target": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Target number of content slides. 0 = unknown (extractor default)."
+        },
+        "narrative_arc": {
+          "type": "string",
+          "enum": ["hourglass", "scr", "pyramid", "assertion-evidence", "problem-solution", "journey"]
+        },
+        "time_blocks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["section", "minutes"],
+            "additionalProperties": false,
+            "properties": {
+              "section": {"type": "string", "minLength": 1},
+              "minutes": {"type": "number", "minimum": 0},
+              "slide_range": {
+                "oneOf": [
+                  {"type": "null"},
+                  {
+                    "type": "array",
+                    "items": {"type": "integer", "minimum": 1},
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "style": {
+      "type": "object",
+      "required": ["preset", "engine", "anti_slop_verified"],
+      "additionalProperties": false,
+      "properties": {
+        "preset": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Named style from the 30-preset catalog."
+        },
+        "engine": {
+          "type": "string",
+          "enum": ["marp", "md2pptx", "pptx", "revealjs", "beamer", "html", "rise"]
+        },
+        "template": {
+          "type": "string",
+          "description": "Optional path to a .pptx or .tex template file."
+        },
+        "anti_slop_verified": {
+          "type": "boolean",
+          "description": "True when slide-coach has confirmed the preset passes anti-slop checks at the Phase 0f approval gate. Extractor drafts always write false; the human confirms at 0f."
+        }
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "required": ["medium"],
+      "additionalProperties": false,
+      "properties": {
+        "medium": {
+          "type": "string",
+          "enum": ["present-live", "share-file", "embed-web", "print-handout"]
+        },
+        "editable": {
+          "type": "boolean",
+          "description": "Whether the user needs to edit the output after generation."
+        },
+        "format_preference": {
+          "type": "string",
+          "enum": ["pptx", "pdf", "html", "notebook"],
+          "description": "Explicit user override for output format. If set, overrides engine resolution."
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "brand": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "logo_path": {"type": "string"},
+            "primary_color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+            "secondary_color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+            "font_family": {"type": "string"}
+          }
+        },
+        "accessibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "min_font_size": {"type": "integer", "minimum": 8},
+            "contrast_ratio": {"type": "number", "minimum": 1.0},
+            "colorblind_safe": {"type": "boolean"}
+          }
+        },
+        "language": {
+          "type": "string",
+          "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+          "description": "ISO 639-1 language code (e.g. 'en', 'ko', 'de')."
+        },
+        "required_sections": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Section names that MUST appear in the deck."
+        },
+        "source_material": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "type"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {"type": "string"},
+              "type": {"type": "string"},
+              "description": {"type": "string"}
+            }
+          }
+        },
+        "max_file_size_kb": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "output_formats": {
+          "type": "array",
+          "items": {"type": "string", "enum": ["pptx", "pdf", "html", "notebook"]}
+        }
+      }
+    }
+  }
+}

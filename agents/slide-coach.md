@@ -231,6 +231,32 @@ The approval gate still applies in --no-coach mode unless the invoking agent exp
 
 ---
 
+## --brief-json Mode (Pre-Built Brief)
+
+When invoked with `--brief-json <path>`, the caller supplies a complete Slide Brief as a JSON file validated against the `slide-brief/1.0` schema (`skills/slide-generation/references/slide-brief.schema.json`).
+
+**Phase 0 behavior with `--brief-json`:**
+
+1. **Skip** Steps 0a–0c entirely — no signal parsing, no completeness check, no gap-fill questions
+2. **Validate** the JSON file via `tools/validate_brief.py <path>`:
+   - Exit 2 (hard failures) → STOP. Report all failures to the caller. Do not proceed.
+   - Exit 1 (warnings only) → Surface warnings to the user at Step 0f, then continue.
+   - Exit 0 → Proceed.
+3. **Load** the validated brief as the Step 0d output. Do not re-assemble it.
+4. **Proceed** to Step 0e (outline generation).
+5. **Run** Step 0f (approval gate) — approval is interpretive and always applies. The user sees a brief that was pre-built, not interactively assembled; they must confirm it represents their actual intent before generation begins.
+
+**When to use `--brief-json`:**
+- API callers or scripts that already have structured brief data
+- Agent-to-agent pipelines where another agent (e.g., slide-extractor in V2.6) produces a brief programmatically
+- Power users who have previously assembled a brief and want to reuse it without re-running the interview
+
+**When NOT to use `--brief-json`:**
+- Interactive sessions where the user hasn't articulated their full intent — use the coach's interview flow instead
+- Briefs assembled from prose descriptions without machine validation — validate first with `tools/validate_brief.py`
+
+---
+
 ## Style Selection Workflow (Preserved from slide-designer)
 
 Load the `presentation-design-styles` skill before making any style decision.

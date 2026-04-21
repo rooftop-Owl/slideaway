@@ -17,8 +17,8 @@
 ## Installation
 
 ```bash
-/plugin marketplace add rooftop-Owl/slideaway
-/plugin install slideaway@slideaway-marketplace
+/plugin marketplace add rooftop-Owl https://github.com/rooftop-Owl/rooftop-owl-marketplace.git
+/plugin install slideaway
 ```
 
 After installing, the `/slides` command, 3 skills, and 3 agents are immediately available in your Claude Code session. No configuration required — engines degrade gracefully if optional dependencies are missing.

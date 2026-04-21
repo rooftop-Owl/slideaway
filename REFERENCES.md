@@ -27,12 +27,12 @@
 | Dual generation + evaluation concern separation | `slide-reviewer` (content) + `slide-qa` (design) as independent agents | Core architectural principle: Producer ≠ Verifier |
 | Structured outline before generation | Phase 0 Slide Brief + outline → approval gate before Phase 1 | PPTAgent generates outline entries with reference slides; we generate a Slide Brief with schema |
 | Self-correction on failure | Phase 4.5 compile check → auto-fix loop (max 2 attempts) | PPTAgent uses REPL feedback; we use compile error classification + known-good preamble swap |
+| **PPTEval Coherence dimension** | Deck-level visual consistency metric — Dimension 5 in slide-qa (V2.4) | Ratifies the existing architectural commitment that a deck is a rhetorical arc, not a set of independent slides; makes the producer→verifier separation coherence-aware |
 
 #### What We Haven't Adopted (Pending Review)
 
 | Pattern | Description | Relevance | Priority |
 |---------|-------------|-----------|----------|
-| **PPTEval Coherence dimension** | Deck-level evaluation: do all slides structurally belong together? Structural roles (opening/section/closing) visually distinct from content slides? | **High** — our slide-qa scores 4 per-slide dimensions but has no cross-deck coherence metric | Next version |
 | **Edit-based generation** | Instead of creating slides from scratch, analyze reference presentations → extract functional types + content schemas → generate editing actions on reference slides | **Medium** — fundamentally different paradigm; would require template library | Evaluate feasibility |
 | **Slide clustering / functional typing** | Categorize slides into structural (opening, section break, closing) vs. content (bullet-point, data, diagram) types before generation | **Medium** — could improve layout archetype selection in Phase 2 | Evaluate |
 | **REPL-based self-correction** | Execute editing actions in REPL; failures feed back to LLM for refinement (vs. our error-classification approach) | **Low** — our compile-check loop serves similar purpose for Beamer | Monitor |
@@ -57,12 +57,12 @@
 |---------|--------------------|-------|
 | Multi-agent pipeline concept | slide-coach → orchestrator → slide-reviewer → slide-qa | SlideBot uses retriever + summarizer + figure-gen + formatter; our roles differ but the multi-agent principle is shared |
 | CLT as a conceptual reference | Referenced in digests and enhancement tracking | Conceptual awareness only — not yet operationalized |
+| **CTML dual-channel optimization** | Mayer's Multimedia Principle — Dimension 6 in slide-reviewer (V2.4) | Ratifies the implicit bimodality commitment already present in coach brief fields (`structure.slides[].visual`) and style library design; makes it a verifiable reviewer criterion |
 
 #### What We Haven't Adopted (Pending Review)
 
 | Pattern | Description | Relevance | Priority |
 |---------|-------------|-----------|----------|
-| **CTML dual-channel optimization** | Every slide should encode its core idea in BOTH a verbal channel (text/title) AND a visual channel (figure/diagram/chart). Mayer's Multimedia Principle. | **High** — we have no QA rule checking "does this slide have a visual element or is it text-only?" | Next version |
 | **Intrinsic load management** | Structured planning to cap content complexity per slide — not just bullet count but conceptual density | **High** — our 6×6 rule and 3-bullet max are crude proxies; CLT provides a theory-grounded metric | Next version |
 | **Extraneous load reduction via visual macros** | Consistent visual patterns (not just anti-slop bans) that reduce cognitive effort: same chart style, same caption placement, same color encoding across the deck | **High** — our anti-slop rules catch bad patterns but we lack positive consistency rules | Next version |
 | **Retrieval integration** | External source retrieval for factual grounding of slide content | **Medium** — relevant for research workflows; could integrate with Zotero plugin | Evaluate |
@@ -258,8 +258,8 @@ Nothing yet — noted in digests.
   - Mayer, R. E. (2009). *Multimedia Learning* (2nd ed.). Cambridge University Press.
   - Mayer, R. E. (2014). *The Cambridge Handbook of Multimedia Learning* (2nd ed.).
 - **Key principles**: Multimedia Principle (words + pictures > words alone), Coherence Principle (remove extraneous material), Signaling Principle (highlight key information), Spatial Contiguity (place text near related visuals)
-- **Adopted in**: Not yet adopted. See SlideBot entry.
-- **Status**: **Not adopted.** CTML's dual-channel optimization is the highest-priority design intelligence gap.
+- **Adopted in**: `agents/slide-reviewer.md` Dimension 6 (Dual-Channel Encoding) as of V2.4.
+- **Status**: **Adopted.** Multimedia Principle operationalized as a reviewer scoring dimension. Intrinsic load management and extraneous load reduction remain pending (see SlideBot entry).
 
 ---
 
@@ -335,10 +335,10 @@ Quick reference: what influenced what.
 | Anti-AI-slop rules | Original to slideaway + community observation | ✅ Original work |
 | WCAG contrast standards | W3C WCAG 2.1 | ✅ Cited by standard name |
 | Colorblind palette (Style 18) | Okabe & Ito (2002) | ✅ Cited by name |
-| CLT / CTML design theory | Sweller (1988), Mayer (2009) via SlideBot | ❌ Not adopted, not cited |
-| PPTEval evaluation framework | PPTAgent (EMNLP 2025) | ⚠️ Partially adopted; Coherence dimension pending |
+| CLT / CTML design theory | Sweller (1988), Mayer (2009) via SlideBot | ✅ Multimedia Principle adopted as slide-reviewer Dimension 6 (V2.4); intrinsic/extraneous load pending |
+| PPTEval evaluation framework | PPTAgent (EMNLP 2025) | ✅ Coherence adopted as slide-qa Dimension 5 (V2.4); edit-based generation + slide clustering pending |
 | 5-step design methodology | Visual communication practitioner consensus | ⚠️ `slide-patterns.md` says "Adapted from visual communication principles" — vague |
-| Slide linter concept | vkehfdl1/slides-grab | ❌ Not adopted, not cited |
+| Slide linter concept | vkehfdl1/slides-grab | ❌ Not adopted — planned for V2.5 |
 
 ---
 

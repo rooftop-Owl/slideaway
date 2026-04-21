@@ -25,6 +25,7 @@ Delegates to the orchestrating agent with subdirectory skill `slide-generation` 
 /slides "topic" --engine beamer --academic
 /slides "topic" --from paper-draft.md --format pptx
 /slides "topic" --no-coach --engine pptx --style executive-suite --slides 12
+/slides "topic" --from competitor-deck.pdf --vision --engine marp --style clean-light
 ```
 
 ## Arguments
@@ -47,13 +48,15 @@ Delegates to the orchestrating agent with subdirectory skill `slide-generation` 
 | `--style <name>` | — | Use a specific style preset by name (e.g., --style executive-suite). Skips style selection. |
 | `--no-coach` | false | Skip Phase 0 discovery. Use provided flags directly for engine/style/duration. For agent-to-agent or power-user use. |
 | `--brief-json <path>` | — | Supply a pre-built Slide Brief as JSON (validated against `slide-brief/1.0` schema). Skips Phase 0a–0c (signal parsing, completeness check, gap-fill). Runs `validate_brief.py` at 0d, then proceeds to 0f approval gate. |
+| `--vision` | false | When combined with `--from <file.pdf>`, invokes `pdf_to_images.py` then `slide-extractor` to lift the source to a Slide Brief via vision. Resumes pipeline at Phase 0f for approval. Without `--vision`, `.pdf` files are text-extracted (unchanged). |
 
 ## Agents Involved
 
-Four agents collaborate across the pipeline:
+Five agents collaborate across the pipeline (six with `--vision`):
 
 | Agent | Phase | Role |
 |-------|-------|------|
+| **slide-extractor** | Phase 0-pre (`--vision` only) | Vision-based ingestion — rendered images → `brief.json` + `outline.md` |
 | **slide-coach** | Phase 0 — Discovery | Signal parsing, audience calibration, brief assembly, outline, approval gate |
 | **Orchestrating agent** | Phase 1–2 — Engine & Content | Engine resolution, content generation, engine conversion |
 | **slide-reviewer** | Phase 3 — Content Review | Narrative coherence, slide-level feedback, content quality |

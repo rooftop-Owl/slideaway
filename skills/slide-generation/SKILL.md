@@ -41,8 +41,18 @@ Phase 5: Delivery report
 
 **Default human path**: Conversational Phase 0 → automated Phases 1–5.
 **Agent-to-agent path**: `--no-coach` with explicit brief → skip Phase 0 → Phases 1–5.
+**Vision path**: `--from <file.pdf> --vision` → Phase 0-pre (slide-extractor) → Phase 0f approval gate → Phases 1–5.
 
 ## Phase-Loading Rules
+
+### Phase 0-pre — Vision Ingestion (slide-extractor, `--vision` only)
+When `--vision` is set alongside `--from <file>`, run Phase 0-pre BEFORE Phase 0:
+- Convert source file to images: `python3 tools/pdf_to_images.py <file> --output-dir slides_images/`
+- Delegate to `slide-extractor` agent: images in → `brief.json` + `outline.md` out
+- Run `tools/validate_brief.py slides_images/brief.json` — exit 2 aborts; exit 1 surfaces warnings at 0f
+- Jump to Phase 0f (approval gate) with the extracted brief as input
+- Skip Phase 0a–0d — they were replaced by slide-extractor's extraction
+- Phase 0f still applies: the user must confirm the extracted brief before generation begins
 
 ### Phase 0 — Discovery (slide-coach)
 When the slide-coach agent is invoked for Phase 0, it MUST load:

@@ -126,6 +126,29 @@ Nothing yet — discovered 2026-04-07.
 
 ## Open-Source Repositories
 
+### Codia NoteSlide — Rendering-First PDF Ingestion
+
+- **Product**: Codia NoteSlide (codia.ai/noteslide)
+- **Key insight**: The canonical input to a slide pipeline is a *Slide* — a rendered unit — not a text dump of a slide. Given rendered slides as images, reconstruct the Slide Brief. The intermediate representation is the brief, not the raw content.
+
+#### What We Adopted
+
+| Pattern | Where in Slideaway | Notes |
+|---------|--------------------|-------|
+| **Rendering-first ingestion** | `agents/slide-extractor.md` + `--vision` flag (V2.6) | Lift any rendered source to the canonical brief via vision. PDF parsed as text ≠ PDF parsed as slides. The `--vision` flag surfaces the interpretive nature of extraction. |
+
+#### What We Haven't Adopted (Pending Review)
+
+| Pattern | Description | Relevance | Priority |
+|---------|-------------|-----------|----------|
+| **Interactive editing UI** | Codia's primary value-add — point-and-click slide editing after import | **Low** — slideaway's value is gated regeneration in a team's style; an editing UI is a different product surface | Not in scope |
+| **PPTX XML parsing** | Parse editable PPTX XML instead of rendering first | **Low** — rendering-first is the correct default; XML parsing is a lower-value path | Future |
+
+- **Last checked**: 2026-04-21 (product analysis)
+- **Framing note**: The reframing influence is architectural, not feature-level. Codia is a SaaS editing tool; slideaway's use of the insight is to feed rendering-first extraction directly into a gated, style-constrained regeneration pipeline.
+
+---
+
 ### PaperBanana — 5-Agent Slide Pipeline
 
 - **Repository**: https://github.com/llmsresearch/paperbanana (1.3k stars)
@@ -341,6 +364,7 @@ Quick reference: what influenced what.
 | PPTEval evaluation framework | PPTAgent (EMNLP 2025) | ✅ Adopted in `agents/slide-qa.md` Dimension 5 (V2.4) |
 | 5-step design methodology | Visual communication practitioner consensus | ⚠️ `slide-patterns.md` says "Adapted from visual communication principles" — vague |
 | Slide linter concept | vkehfdl1/slides-grab | ✅ Adopted in `tools/slide_linter.py` + hook (V2.5) |
+| Rendering-first PDF ingestion | Codia NoteSlide | ✅ Adopted in `agents/slide-extractor.md` + `--vision` flag (V2.6) |
 
 ---
 
